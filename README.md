@@ -27,14 +27,12 @@ public class MySingletonService {
 #### 2. Prototype Scope
 - Annotation: @Scope("prototype")
 - Description: A new instance of the bean is created every time it is requested from the container.
-
-  ```java
+```java
 @Component
 @Scope("prototype")
 public class MyPrototypeService {
 }
-
-  ```
+```
 - Use Case: Use when you need a new instance for every request, such as in multi-threaded environments.
 #### 3. Request Scope
 - Annotation: @RequestScope
@@ -53,13 +51,12 @@ public class MyRequestScopedService {
 - Annotation: @SessionScope
 - Description: A new bean instance is created for each HTTP session. The bean will last as long as the session is active.
 
-  ```java
+```java
 @Component
 @SessionScope
 public class MySessionScopedService {
 }
-
-  ```
+```
 - Use Case: Use to store session-specific data (e.g., user preferences or shopping cart details).
 
 #### 5. Application Scope
@@ -120,4 +117,4 @@ Singleton: 12345678, Prototype: 87654321
 ```
 - Note: On every request, the prototype bean will have a different hash code, but the singleton bean will retain the same hash code.
 
-  <img width="349" alt="image" src="https://github.com/user-attachments/assets/21f716bf-7ab5-4d5a-b9c2-a7cac2fcf5e4">
+  <img width="849" alt="image" src="https://github.com/user-attachments/assets/21f716bf-7ab5-4d5a-b9c2-a7cac2fcf5e4">
