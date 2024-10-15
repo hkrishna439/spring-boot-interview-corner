@@ -118,3 +118,15 @@ Singleton: 12345678, Prototype: 87654321
 - Note: On every request, the prototype bean will have a different hash code, but the singleton bean will retain the same hash code.
 
   <img width="849" alt="image" src="https://github.com/user-attachments/assets/21f716bf-7ab5-4d5a-b9c2-a7cac2fcf5e4">
+
+### @Bean
+- @Bean annotation is used in @Configuration classes to define beans that will be managed by the Spring container. 
+ @Bean annotation is a method-level annotation that indicates that a method will create, configure, and initialize a new object to be managed by the Spring IoC container.
+#### Why Use @Bean?
+- Manual Bean Creation: Sometimes, Spring’s automatic configuration isn't enough, and you need to create beans manually. This is where @Bean comes into play.
+- Flexibility: You can use @Bean to control the exact behavior of the objects created, offering more customization than component-scanning-based beans.
+- Dependency Injection: Beans defined using @Bean can be injected into other parts of the application using @Autowired or constructor injection.
+#### When to Use @Bean?
+- When you want to configure an external library's object that Spring cannot automatically configure.
+- When you need fine control over the instantiation logic of an object.
+For objects like services, repositories, or utilities that require specific configurations
