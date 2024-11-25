@@ -19,8 +19,7 @@
     - Leverages the power of the Spring ecosystem, making it easy to implement features like security, data access, or messaging.
 
 ### 2.	Explain the difference between Spring Framework and Spring Boot.
-![Screenshot 2024-11-24 201851.png](..%2F..%2FPictures%2FScreenshots%2FScreenshot%202024-11-24%20201851.png)
-
+![img_6.png](img_6.png)
 #### Interview Explanation:
 Spring Framework is a robust framework for building Java-based applications, but it often requires significant manual configuration and setup. In contrast, Spring Boot is designed to streamline and simplify the development process by offering opinionated defaults, auto-configuration, and embedded servers.
 
@@ -220,7 +219,7 @@ A **Spring Boot Starter** is a **pre-defined set of dependencies** provided by S
 
 **Time-Saving:** Developers can add one dependency to enable specific features instead of adding multiple related dependencies.
 
-![Screenshot 2024-11-24 214727.png](..%2F..%2FPictures%2FScreenshots%2FScreenshot%202024-11-24%20214727.png)
+![img_4.png](img_4.png)
 
 ### 6. Explain auto-configuration in Spring Boot.
 Auto-configuration is a key feature of Spring Boot that automatically configures your application based on the dependencies and settings available in your project. It eliminates the need for manual configuration by providing sensible defaults and enabling required beans and configurations automatically.
@@ -330,7 +329,544 @@ public class MyApplication { }
 spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 
 ```
-![Screenshot 2024-11-25 084053.png](..%2F..%2FPictures%2FScreenshots%2FScreenshot%202024-11-25%20084053.png)
+![img_5.png](img_5.png)
+
+### 7. What is the Spring Boot Actuator, and how do you use it?
+
+**Spring Boot Actuator** is a module in Spring Boot that provides a set of production-ready features to help monitor and manage applications. It exposes various endpoints that give insights into the application’s health, metrics, environment, configurations, and more.
+
+This tool is particularly useful for operational purposes, such as debugging, auditing, performance monitoring, and diagnostics.
+
+
+**Key Features of Spring Boot Actuator**
+
+1. **Endpoints for Monitoring and Management:**
+
+   - Provides REST API endpoints for various metrics and health checks.
+   - Examples: ``/actuator/health, /actuator/metrics, /actuator/env.``
+2. **Customizable Endpoints:**
+
+    - You can enable, disable, or secure specific endpoints as needed.
+3. **Integration with Monitoring Tools:**
+
+    - Works seamlessly with tools like Prometheus, Grafana, and Micrometer for performance monitoring.
+4. **Insight into Application State:**
+
+    - Displays runtime details such as active beans, environment variables, memory usage, and thread details.
+
+
+**How to Use Spring Boot Actuator**
+
+**Step 1: Add Actuator Dependency**
+
+Include the Spring Boot Actuator starter in your pom.xml or build.gradle.
+
+**Maven:**
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+```
+
+**Gradle:**
+
+```
+implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+```
+**Step 2: Configure Actuator Endpoints**
+
+By default, only the ``/actuator/health`` and ``/actuator/info`` endpoints are exposed. To enable or customize endpoints, update the ``application.properties`` or ``application.yml`` file.
+
+**Example: Enable All Endpoints**
+
+```
+management.endpoints.web.exposure.include=*
+
+```
+**Example: Enable Specific Endpoints**
+
+```
+management.endpoints.web.exposure.include=health,info,metrics
+```
+**Example: Secure Endpoints** Use Spring Security to restrict access:
+
+```
+management.endpoint.health.roles=ADMIN
+
+```
+
+**Step 3: Access Actuator Endpoints**
+
+Default Endpoints:
+
+![img.png](img.png)
+
+**Step 4: Customize Health Checks and Info**
+
+**Custom Health Indicator:** You can create a custom health check by implementing the HealthIndicator interface:
+
+```java
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomHealthIndicator implements HealthIndicator {
+    @Override
+    public Health health() {
+        // Add custom logic
+        return Health.up().withDetail("custom", "Everything is fine").build();
+    }
+}
+
+```
+
+**Custom Info:** Add custom application info in application.properties:
+
+```
+info.app.name=Demo Application
+info.app.version=1.0.0
+
+```
+Access via ``/actuator/info.``
+
+
+**Step 5: Integrate with Monitoring Tools**
+
+**Micrometer:** Integrates with Actuator to provide application metrics.
+
+**Prometheus:** Use the prometheus endpoint to export metrics.
+
+**Grafana:** Visualize metrics using dashboards.
+
+**Cloud Providers:** Integrate with AWS CloudWatch, Azure Monitor, etc.
+
+**Advantages of Spring Boot Actuator**
+
+1. **Quick Monitoring Setup:**
+
+    - Minimal configuration required to enable health checks and metrics.
+2. **Production Readiness:**
+
+    - Provides detailed runtime insights to ensure application stability.
+3. **Integration-Friendly:**
+
+    - Works with many third-party monitoring and alerting tools.
+4. **Customizable and Extendable:**
+
+    -Create custom endpoints or health indicators based on business needs.
+
+**Example Use Case**
+
+Suppose you want to monitor an e-commerce application for uptime and performance. Using Actuator, you can:
+
+- Check if the application is running (``/actuator/health``).
+- Monitor request throughput and response times (``/actuator/metrics``).
+- Diagnose memory leaks using a thread dump (``/actuator/threads``).
+
+### 8. How do you handle application properties in Spring Boot?
+Spring Boot provides a flexible way to configure application settings using property files. These configurations can be set in ``application.properties`` or ``application.yml`` files, externalized configurations, environment variables, or even command-line arguments.
+
+**1. Configuring Properties in application.properties or application.yml**
+
+   **Default Location:**
+   These files are typically located in `src/main/resources`.
+
+   **Example** `application.properties`:
+```
+server.port=8081
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=password
+logging.level.org.springframework=DEBUG
+```
+**Example** `application.yml`:
+```
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb
+    username: root
+    password: password
+
+logging:
+  level:
+    org.springframework: DEBUG
+
+```
+**2. Accessing Properties in Code**
+
+**Using** `@Value` **Annotation**:
+
+   You can inject individual properties directly into fields or methods.
+
+**Example:**
+
+```java
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyService {
+    @Value("${server.port}")
+    private int serverPort;
+
+    @Value("${spring.datasource.url}")
+    private String dataSourceUrl;
+
+    public void printProperties() {
+        System.out.println("Server Port: " + serverPort);
+        System.out.println("DataSource URL: " + dataSourceUrl);
+    }
+}
+
+```
+**Using** `@ConfigurationProperties`:
+
+For managing multiple related properties, use the @ConfigurationProperties annotation. This maps property keys to fields in a class.
+
+**Example:**
+
+1. Enable configuration properties in the main class:
+
+```java
+@SpringBootApplication
+@EnableConfigurationProperties(MyProperties.class)
+public class DemoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+
+```
+2. Create a class for properties:
+```java
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "myapp")
+public class MyProperties {
+    private String name;
+    private int timeout;
+
+    // Getters and Setters
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public int getTimeout() {
+        return timeout;
+    }
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+}
+
+```
+3. Define properties in `application.properties`:
+```
+myapp.name=My Application
+myapp.timeout=30
+
+```
+4. Use the properties:
+
+```
+@Autowired
+private MyProperties myProperties;
+
+System.out.println(myProperties.getName());
+System.out.println(myProperties.getTimeout());
+
+```
+**3. Externalizing Configuration**
+
+   Spring Boot allows external configuration of properties for easier environment-specific setups (e.g., dev, test, prod).
+
+**Priority of Configuration Sources:**
+
+1. Command-line arguments
+2. Environment variables
+3. `application.properties` or `application.yml`
+4. Default settings
+
+**Environment-Specific Properties:**
+
+1. Create files like `application-dev.properties` or `application-prod.properties`.
+2. Activate a profile in `application.properties`:
+```
+spring.profiles.active=dev
+
+```
+**4. Using Profiles for Environment Management**
+
+   Profiles allow you to define separate configurations for different environments.
+
+**Example Setup:**
+
+1. `application-dev.properties`:
+```
+server.port=8082
+logging.level.org.springframework=DEBUG
+
+```
+2. `application-prod.properties`:
+```
+server.port=8080
+logging.level.org.springframework=ERROR
+
+```
+3. Activate the desired profile:
+```
+spring.profiles.active=prod
+```
+
+**5. Binding Complex Properties**
+
+   You can define and bind hierarchical properties to Java classes using @ConfigurationProperties.
+
+**Example for Nested Properties:**
+
+`application.yml:`
+```
+app:
+  settings:
+    retries: 5
+    timeout: 30
+
+```
+**Java Class:**
+```java
+@ConfigurationProperties(prefix = "app.settings")
+@Component
+public class AppSettings {
+    private int retries;
+    private int timeout;
+
+    // Getters and Setters
+}
+
+```
+**6. Overriding Properties**
+
+   You can override properties using:
+
+1. Command-line arguments:
+```
+java -jar app.jar --server.port=9090
+
+```
+2. Environment Variables:
+```
+export SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/anotherdb
+
+```
+3. System Properties:
+```
+java -Dspring.datasource.username=admin -jar app.jar
+
+```
+**7. Encrypting Sensitive Properties**
+
+   Sensitive data like passwords can be encrypted using third-party tools like Jasypt or Spring Cloud Config.
+
+
+### 9. What is the use of @RestController?
+The `@RestController` annotation in Spring Boot is a specialized version of the `@Controller` annotation. It is used to create RESTful web services by combining the functionalities of` @Controller` and `@ResponseBody`.
+
+When you annotate a class with `@RestController`, Spring Boot automatically handles HTTP requests and serializes Java objects into JSON (or other formats like XML) in the HTTP response body.
+
+**Key Features of @RestController:**
+
+1. **Simplifies REST API Development:**
+
+    - No need to explicitly annotate methods with `@ResponseBody` as it's included in `@RestController`.
+2. **Handles HTTP Requests**:
+
+    - Maps HTTP requests (like `GET`, `POST`, `PUT`, `DELETE`) to specific methods using `@RequestMapping` or HTTP-specific annotations (`@GetMapping`, `@PostMapping`, etc.).
+3. **Automatic JSON Conversion**:
+
+    - Converts Java objects to JSON responses using the Jackson library (or other configured message converters).
+4. **Lightweight:**
+
+    - Primarily used for APIs, not for rendering web views like JSP or Thymeleaf.
+   
+**Usage Example**
+
+1. Basic Example:
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api")
+public class MyRestController {
+
+    @GetMapping("/hello")
+    public String sayHello() {
+        return "Hello, World!";
+    }
+}
+
+```
+- URL to access: `http://localhost:8080/api/hello`
+- Response: `Hello, World!`
+
+**2. Returning JSON Data:**
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class UserController {
+
+    @GetMapping("/user")
+    public User getUser() {
+        return new User(1, "John Doe", "john.doe@example.com");
+    }
+}
+
+class User {
+    private int id;
+    private String name;
+    private String email;
+
+    // Constructor, Getters, and Setters
+
+    public User(int id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+
+    // Getters and setters (omitted for brevity)
+}
+
+```
+- **URL to access:** `http://localhost:8080/user`
+- **Response (JSON):**
+- 
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john.doe@example.com"
+}
+
+```
+**Why Use `@RestController`?**
+
+- To simplify the development of RESTful APIs.
+- It reduces boilerplate code (no need to annotate each method with `@ResponseBody`).
+- Ensures efficient and easy JSON serialization for HTTP responses.
+- Widely used for microservices architecture where APIs communicate using JSON or XML.
+
+### 10. Explain the difference between @Controller and @RestController.
+`@Controller` and `@RestController` are both Spring annotations used to define controller classes, but they serve different purposes depending on the nature of the application (web-based vs. RESTful). Here's a detailed comparison:
+
+![img_2.png](img_2.png)
+
+**Examples**
+
+1. **Example of** `@Controller`:
+
+```java
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.ui.Model;
+
+@Controller
+public class WebController {
+
+    @GetMapping("/home")
+    public String homePage(Model model) {
+        model.addAttribute("message", "Welcome to the home page!");
+        return "home";  // Resolves to "home.html" or "home.jsp"
+    }
+}
+
+```
+**Purpose:**
+
+- Used for applications that render views (e.g., an HTML page like `home.html`)
+
+**Behavior:**
+
+- The `return "home"` tells Spring to look for a view named home using the configured view resolver.
+
+
+2. **Example of** `@RestController`:
+
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ApiController {
+
+    @GetMapping("/api/greeting")
+    public String greeting() {
+        return "Hello, World!";
+    }
+}
+
+```
+**Purpose:**
+
+- Used for APIs that return data (e.g., `Hello, World!` as plain text or JSON).
+
+**Behavior:**
+
+- Automatically serializes the return value into the HTTP response body (e.g., JSON).
+
+**Key Differences in Behavior**
+
+**Without** @ResponseBody
+
+If you use` @Controller` and don't specify `@ResponseBody`, Spring assumes the method is returning a view name, not raw data.
+
+**With** `@RestController`
+
+Using `@RestController` eliminates the need for `@ResponseBody` on each method because it’s implied that the controller handles RESTful responses.
+
+
+**When to Use What?**
+
+- **Use** `@Controller`:
+
+    - For traditional web applications with a user interface that renders HTML or other view templates like Thymeleaf, JSP, etc.
+- **Use** `@RestController`:
+
+    - For RESTful services or microservices where the application primarily provides data as JSON or XML responses.
+
+
+### 11. 	What is @RequestMapping and its variants?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### @Scope
