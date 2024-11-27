@@ -281,7 +281,7 @@ spring.jpa.hibernate.ddl-auto=update
 
 - Enables Spring Boot’s auto-configuration feature.
 - Usually included via @SpringBootApplication.
--
+
 ``@ConditionalOnClass:``
 
 - Configures beans only if a specific class is present in the classpath.
@@ -754,7 +754,7 @@ class User {
 ```
 - **URL to access:** `http://localhost:8080/user`
 - **Response (JSON):**
-- 
+
 ```json
 {
   "id": 1,
@@ -850,6 +850,596 @@ Using `@RestController` eliminates the need for `@ResponseBody` on each method b
 
 
 ### 11. 	What is @RequestMapping and its variants?
+
+`@RequestMapping` is an annotation in Spring Framework used to map HTTP requests to specific handler methods in a controller class. It allows developers to define the URL path, HTTP method, and other request-mapping details.
+
+In addition to `@RequestMapping`, Spring provides method-specific variants like `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping` for convenience.
+
+**1. @RequestMapping**
+
+   **Purpose:**
+   Maps HTTP requests to controller methods.
+
+- **Attributes:**
+![img_7.png](img_7.png)
+**Example:**
+   ```java
+   import org.springframework.web.bind.annotation.RequestMapping;
+   import org.springframework.web.bind.annotation.RequestMethod;
+   import org.springframework.web.bind.annotation.RestController;
+   
+   @RestController
+   @RequestMapping("/api")
+   public class MyController {
+   
+       @RequestMapping(value = "/greet", method = RequestMethod.GET)
+       public String greet() {
+           return "Hello, World!";
+       }
+   }
+   
+   ```
+  - URL to access: `http://localhost:8080/api/greet`
+  - HTTP Method: `GET`
+
+**2. Variants of @RequestMapping**
+
+   Spring introduced method-specific annotations for common HTTP methods to make code more concise and readable.
+
+
+**2.1 @GetMapping**
+
+   - Used for handling GET requests.
+   - **Example:**
+   ```
+@GetMapping("/users")
+public List<String> getUsers() {
+    return List.of("Alice", "Bob", "Charlie");
+}
+```
+**2.2 @PostMapping**
+
+   - Used for handling POST requests.
+   - **Example:**
+   ```java
+   @PostMapping("/users")
+   public String createUser(@RequestBody String user) {
+      return "User " + user + " created!";
+}
+
+   ```
+**2.3 @PutMapping**
+
+   - Used for handling PUT requests.
+   - **Example:**
+   ```java
+    @PutMapping("/users/{id}")
+   public String updateUser(@PathVariable int id, @RequestBody String user) {
+      return "User with ID " + id + " updated to " + user;
+}
+
+   ```
+**2.4 @DeleteMapping**
+
+   - Used for handling DELETE requests.
+   - **Example:**
+
+
+```java
+@DeleteMapping("/users/{id}")
+public String deleteUser(@PathVariable int id) {
+    return "User with ID " + id + " deleted!";
+}
+
+```
+
+**2.5 @PatchMapping**
+
+   - Used for handling PATCH requests (partial updates).
+   - **Example:**
+
+```java
+@PatchMapping("/users/{id}")
+public String updateUserPartial(@PathVariable int id, @RequestBody Map<String, Object> updates) {
+    return "User with ID " + id + " partially updated!";
+}
+
+```
+**Advanced Examples**
+
+**Mapping with Parameters:**
+```java
+@RequestMapping(value = "/filter", method = RequestMethod.GET, params = "type=admin")
+public String filterAdmins() {
+    return "Filtered admin users";
+}
+
+```
+- Access URL:` /filter?type=admin`
+
+**Mapping with Headers:**
+```java
+@RequestMapping(value = "/headers", headers = "X-Custom-Header=my-header")
+public String withHeaders() {
+    return "Custom header present!";
+}
+
+```
+- Access URL: Add the header `X-Custom-Header=my-header` to the request.
+
+**Mapping with Content Type (Consumes/Produces):**
+```java
+@RequestMapping(value = "/json", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+public String handleJson(@RequestBody String json) {
+    return "{\"message\": \"Received JSON\"}";
+}
+
+```
+- **Consumes**: Specifies the type of request body.
+- **Produces**: Specifies the type of response body.
+
+**When to Use @RequestMapping or Variants**
+
+- Use `@RequestMapping`:
+
+   - For complex mappings (e.g., with parameters, headers, or multiple attributes).
+   - For backward compatibility with older Spring versions.
+**Use HTTP-Specific Variants:**
+   - For simple, single-method mappings (e.g., `GET`, `POST`).
+   - To make code more readable and concise.
+
+### 12. What is @PathVariable, and how is it used?
+
+`@PathVariable` is an annotation in Spring Framework used to extract values from the URL path in a RESTful API. It binds the values from the URL directly to the method parameters, making it easy to handle dynamic parts of a URL.
+
+**Key Features of @PathVariable:**
+
+1. **Dynamic URL Parameters:**
+
+    - Enables handling URLs with dynamic segments (e.g., `/users/{id}`).
+2. **Binding Path Variables to Method Parameters:**
+
+    - Automatically maps URL segments to method parameters.
+3. **Customization:**
+
+    - Allows specifying a different name for the variable in the URL and the method parameter.
+
+**How to Use** `@PathVariable`
+
+**Basic Example:**
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class UserController {
+
+    @GetMapping("/users/{id}")
+    public String getUserById(@PathVariable int id) {
+        return "User with ID: " + id;
+    }
+}
+
+```
+- URL: `http://localhost:8080/users/101`
+-  Response: `User with ID: 101`
+
+**Using Multiple** `@PathVariable`:
+
+```java
+@GetMapping("/users/{userId}/orders/{orderId}")
+public String getOrderDetails(@PathVariable int userId, @PathVariable int orderId) {
+    return "Order " + orderId + " for User " + userId;
+}
+
+```
+- URL: `http://localhost:8080/users/1/orders/45`
+- Response: `Order 45 for User 1`
+
+**Customizing the Path Variable Name:**
+
+If the path variable name in the URL and the method parameter are different, you can specify the mapping explicitly.
+
+```java
+@GetMapping("/products/{productId}")
+public String getProduct(@PathVariable("productId") int id) {
+    return "Product with ID: " + id;
+}
+
+```
+- URL: `http://localhost:8080/products/20`
+- Response: `Product with ID: 20`
+
+**Advanced Features**
+
+**Path Variables with Regular Expressions:**
+
+You can restrict the format of path variables using regular expressions.
+
+```java
+@GetMapping("/users/{id:[0-9]+}")
+public String getUserById(@PathVariable int id) {
+    return "User ID: " + id;
+}
+
+```
+- Acceptable URL:` http://localhost:8080/users/123`
+- Invalid URL: `http://localhost:8080/users/abc` (will return a 404 error).
+
+![img_8.png](img_8.png)
+
+**Best Practices for Using @PathVariable:**
+1. **Use** `@PathVariable` **for IDs or other essential URL parameters.**
+
+    - E.g., /`users/{id}` is more intuitive than `/users?id=123`.
+2. **Avoid overusing dynamic segments.**
+
+    - Use query parameters (`@RequestParam`) for optional or non-essential data.
+3. **Validate Path Variables.**
+
+    - Use regular expressions in the mapping or add validation logic in the method.
+
+### 13. How is @RequestParam used?
+`@RequestParam` is an annotation in the Spring Framework used to extract query parameters from the URL of an HTTP request and bind them to method parameters in a controller. It is commonly used for retrieving optional or additional data sent along with the request.
+
+**Key Features of `@RequestParam`**
+
+1. **Maps Query Parameters:**
+Extracts parameters from the query string of the URL (e.g., ?key=value).
+
+2. **Binds Query Parameters to Method Parameters:**
+Automatically binds query parameters to Java method parameters.
+
+3. **Customization:**
+Allows setting default values and marking parameters as required or optional.
+
+
+**How to Use `@RequestParam`**
+
+**Basic Example**
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ExampleController {
+
+    @GetMapping("/greet")
+    public String greet(@RequestParam String name) {
+        return "Hello, " + name + "!";
+    }
+}
+
+```
+- URL:` http://localhost:8080/greet?name=John`
+- Response: `Hello, John!`
+
+**Setting Default Values**
+
+  You can provide a default value for a query parameter if it is not supplied in the request.
+```java
+@GetMapping("/greet")
+public String greet(@RequestParam(defaultValue = "Guest") String name) {
+    return "Hello, " + name + "!";
+}
+
+```
+- URL without parameter: `http://localhost:8080/greet`
+- Response: `Hello, Guest!`
+- 
+**Optional Query Parameters**
+
+  You can make a query parameter optional by setting required = false.
+```java
+@GetMapping("/greet")
+public String greet(@RequestParam(required = false) String name) {
+    if (name == null) {
+        return "Hello, Guest!";
+    }
+    return "Hello, " + name + "!";
+}
+
+```
+- URL without parameter: `http://localhost:8080/greet`
+- Response: `Hello, Guest!`
+
+**Multiple Query Parameters**
+
+You can handle multiple query parameters in the same method.
+
+```java
+@GetMapping("/user")
+public String getUserDetails(@RequestParam String name, @RequestParam int age) {
+    return "User: " + name + ", Age: " + age;
+}
+
+```
+- URL: `http://localhost:8080/user?name=Alice&age=25`
+- Response: `User: Alice, Age: 25`
+
+**Using Collections as Parameters**
+
+You can bind query parameters to a List or Set.
+
+```java
+@GetMapping("/numbers")
+public String getNumbers(@RequestParam List<Integer> nums) {
+    return "Numbers: " + nums.toString();
+}
+
+```
+- URL: `http://localhost:8080/numbers?nums=1&nums=2&nums=3`
+- Response: `Numbers: [1, 2, 3]`
+
+**Best Practices for @RequestParam**
+
+1. **Use Default Values:**
+Avoid `NullPointerException` or unnecessary validation checks by providing default values.
+
+2. **Mark Optional Parameters:**
+Use `required = false` for query parameters that may not always be present.
+
+3. **Use Descriptive Parameter Names:**
+Ensure parameter names are self-explanatory for better readability and usability.
+
+4. **Validate Query Parameters:**
+Use validation annotations like `@Min`,` @Max`, or custom validators for input validation.
+
+### 14. What is the purpose of @Component and @Service?
+
+In the Spring Framework, `@Component` and `@Service` are **stereotype annotations** that indicate a class is a Spring-managed bean. They allow Spring to detect and register these classes automatically in the **Spring Application Context** during component scanning
+
+`@Component`
+
+1.**Purpose:**
+
+Marks a class as a Spring-managed bean. It's a generic stereotype that can be used for any class you want Spring to manage but doesn’t specify the role of the class in the application.
+
+2.**Usage:**
+
+Use `@Component` for general-purpose Spring beans when other specific stereotypes like `@Service`, `@Repository`, or `@Controller` don’t fit.
+
+**Example:**
+```java
+import org.springframework.stereotype.Component;
+
+@Component
+public class EmailValidator {
+    public boolean isValid(String email) {
+        return email.contains("@");
+    }
+}
+
+```
+- **Key Feature**: The class `EmailValidator` will now be managed by Spring, meaning it can be injected into other components using `@Autowired.`
+
+`@Service`
+
+1.**Purpose:**
+
+Specialization of @Component that is specifically intended for business logic and service-layer classes. It adds semantic meaning to the application, indicating that the class contains service logic.
+
+2.**Usage:**
+
+Use @Service to define a class as part of the service layer in your application.
+
+**Example:**
+```java
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+    public String getUserById(int id) {
+        return "User-" + id;
+    }
+}
+
+```
+- **Key Feature**: By marking this class with `@Service`, it becomes clear to developers that it belongs to the **business logic layer**
+
+![img_9.png](img_9.png)
+
+**How They Work in Spring**
+
+1.**Component Scanning:**
+
+Both @Component and @Service are discovered during Spring's component scanning process, which scans the classpath for annotated classes.
+
+- This requires enabling component scanning using annotations like @ComponentScan or Spring Boot's default configuration.
+
+2.**Bean Registration:**
+
+Both annotations register the class as a bean in the Spring Application Context, making it eligible for dependency injection.
+
+
+**Practical Example:**
+
+- Consider an application with an email service.
+
+**EmailValidator Class:**
+
+- Handles general utility functionality.
+
+```java
+@Component
+public class EmailValidator {
+    public boolean isValid(String email) {
+        return email.contains("@");
+    }
+}
+
+```
+**EmailService Class:**
+
+- Handles the business logic for sending emails.
+```java
+@Service
+public class EmailService {
+    private final EmailValidator emailValidator;
+
+    public EmailService(EmailValidator emailValidator) {
+        this.emailValidator = emailValidator;
+    }
+
+    public String sendEmail(String email) {
+        if (emailValidator.isValid(email)) {
+            return "Email sent to " + email;
+        } else {
+            return "Invalid email address!";
+        }
+    }
+}
+
+```
+
+
+### 15. How does @Autowired work in Spring Boot?
+
+`@Autowired` is an annotation in the Spring Framework used for **dependency injection**. It allows Spring to automatically resolve and inject a bean into another bean, reducing boilerplate code and making it easier to manage dependencies.
+
+**Key Features of @Autowired:**
+
+1. **Dependency Injection:**
+Automatically injects required dependencies into a class.
+
+2. **Bean Discovery:**
+Spring looks for a matching bean in the **Application Context** (by type, and optionally by name) and injects it.
+
+3. **Injection Points:**
+Can be applied to constructors, fields, or setter methods.
+
+4. **Optional Dependencies:**
+Can handle optional dependencies with `required = false`.
+
+**How @Autowired Works:**
+
+1. **Default Behavior:**
+   By default, `@Autowired` performs type-based injection:
+
+    - It searches for a bean of the same type in the application context.
+2. **Matching by Name:**
+   If there are multiple beans of the same type, Spring tries to resolve the conflict by matching the variable name to the bean name.
+
+3. **No Matching Bean:**
+   If no matching bean is found, Spring throws an exception unless `required = false` is specified.
+
+**Examples of `@Autowired`**
+
+**1. Field Injection (Not Recommended)**
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+}
+
+```
+- Spring injects `UserRepository` directly into the field.
+- **Drawback**: Difficult to test and violates the principles of Dependency Injection (DI).
+
+**2. Setter Injection**
+```java
+@Component
+public class UserService {
+
+    private UserRepository userRepository;
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+}
+
+```
+- Dependencies are injected through a setter method.
+- Allows late injection and easier testing.
+
+**3. Constructor Injection (Recommended)**
+```java
+@Component
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+}
+
+```
+- Preferred method as it ensures that dependencies are injected when the object is created.
+- Enables immutability and simplifies testing
+
+
+**Handling Multiple Beans with `@Autowired`**
+
+If there are multiple beans of the same type, you can specify which bean to inject using:
+
+1.` @Qualifier:`
+
+```java
+@Component
+public class UserService {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserService(@Qualifier("myRepository") UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+}
+
+```
+2. **Bean Names:**
+
+- If no qualifier is provided, Spring tries to match the bean by name.
+
+**Optional Dependencies with `@Autowired`**
+
+You can specify `required = false` to make a dependency optional:
+```java
+@Autowired(required = false)
+private NotificationService notificationService;
+
+```
+If `NotificationService` is not available in the context, the field will be null instead of throwing an exception.
+
+**Best Practices for `@Autowired`**
+
+1. Prefer Constructor Injection:
+It promotes immutability, makes dependencies explicit, and simplifies testing.
+
+2. Avoid Field Injection:
+It makes unit testing harder and violates DI principles.
+
+3. Use `@Qualifier` for Multiple Beans:
+Resolve ambiguity when there are multiple beans of the same type.
+
+4. Validate Optional Dependencies:
+Ensure proper handling of optional dependencies when `required = false`.
+
+
+
+
+
 
 
 
