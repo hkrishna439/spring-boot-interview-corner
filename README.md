@@ -1080,6 +1080,17 @@ public String getUserById(@PathVariable int id) {
 
     - Use regular expressions in the mapping or add validation logic in the method.
 
+**Common Interview Scenarios**
+
+**Scenario 1: Explain PathVariable Usage**
+- A candidate might explain the basics and demonstrate how `@PathVariable` maps dynamic URL parts to method parameters.
+
+**Scenario 2: Handling Multiple Path Variables**
+- Explain how to handle multiple dynamic segments in a URL and the mapping logic.
+
+**Scenario 3: Custom Path Variable Names**
+- Discuss how to map a differently named path variable to a method parameter.
+
 ### 13. How is @RequestParam used?
 `@RequestParam` is an annotation in the Spring Framework used to extract query parameters from the URL of an HTTP request and bind them to method parameters in a controller. It is commonly used for retrieving optional or additional data sent along with the request.
 
@@ -1128,7 +1139,7 @@ public String greet(@RequestParam(defaultValue = "Guest") String name) {
 ```
 - URL without parameter: `http://localhost:8080/greet`
 - Response: `Hello, Guest!`
-- 
+
 **Optional Query Parameters**
 
   You can make a query parameter optional by setting required = false.
@@ -1186,6 +1197,17 @@ Ensure parameter names are self-explanatory for better readability and usability
 
 4. **Validate Query Parameters:**
 Use validation annotations like `@Min`,` @Max`, or custom validators for input validation.
+
+**Common Interview Scenarios**
+
+**Scenario 1: Explain Default Values**
+- You may be asked how `@RequestParam` handles default values or optional parameters. Demonstrate by providing examples of `defaultValue` or `required = false`.
+
+**Scenario 2: Collections in Query Parameters**
+- Explain how `@RequestParam` supports handling multiple values (e.g., `?nums=1&nums=2`).
+
+**Scenario 3: Compare `@RequestParam` with `@PathVariable`**
+- Highlight when to use `@RequestParam` (e.g., filtering, pagination) and when `@PathVariable` is more appropriate (e.g., identifying resources).
 
 ### 14. What is the purpose of @Component and @Service?
 
@@ -1293,7 +1315,20 @@ public class EmailService {
 }
 
 ```
+**Interview Insights**
 
+**Common Questions:**
+
+1. What is the difference between `@Component `and` @Service`?
+
+- `@Service` is a specialization of `@Component` used for the service layer. Both are managed by Spring.
+2. **Why use @Service instead of `@Component`?**
+
+- To indicate the specific role of the class in the application's architecture (business logic).
+3. **Can you replace` @Service` with `@Component`?**
+
+- Yes, technically. But using `@Service` adds semantic clarity, making the code more maintainable and understandable.
+Summary
 
 ### 15. How does @Autowired work in Spring Boot?
 
@@ -1436,27 +1471,1598 @@ Resolve ambiguity when there are multiple beans of the same type.
 4. Validate Optional Dependencies:
 Ensure proper handling of optional dependencies when `required = false`.
 
+**Common Interview Questions**
+
+1. **What is `@Autowired?`**
+
+- `@Autowired `is used to inject dependencies automatically in Spring beans.
+2. **What are the different ways to use `@Autowired`?**
+
+- Field injection, setter injection, and constructor injection.
+3. **What happens if Spring finds multiple beans of the same type?**
+
+- Spring throws a `NoUniqueBeanDefinitionException` unless a specific bean is specified using `@Qualifier`.
+4. **How do you handle optional dependencies?**
+
+- Use `@Autowired(required = false)` to allow for optional dependencies.
+5. **Why is constructor injection preferred over field injection?**
+
+- Constructor injection ensures immutability, makes dependencies explicit, and simplifies testing.
+
+### 16. What is the difference between @Bean and @Component?
+Both `@Bean` and `@Component` are used to define Spring beans, but they serve different purposes and are used in different contexts. Here's a detailed explanation:
 
 
+**1.** `@Component`
+
+   1.**Definition**:
+   `@Component` is a stereotype annotation used to indicate that a class is a Spring-managed component (or bean). It allows the class to be automatically detected and registered as a bean during component scanning.
+
+   2.**Use Case:**
+
+    - Applied at the class level to make a class a Spring-managed bean.
+    - Suitable for self-contained components such as services, repositories, or controllers.
+   
+   3.**Example:**
+```java
+import org.springframework.stereotype.Component;
+
+@Component
+public class EmailService {
+    public void sendEmail(String email) {
+        System.out.println("Sending email to: " + email);
+    }
+}
+
+```
+  4. **Bean Registration:**
+ Beans are registered automatically via classpath scanning and require @ComponentScan or Spring Boot’s default scanning configuration.
 
 
+**2.** `@Bean`
+1.**Definition:**
+
+`@Bean` is used to **explicitly define a bean** in a Spring **configuration class**. It provides finer control over bean creation and initialization.
+
+2.**Use Case:**
+
+- Used in **Java-based configuration classes** to manually define beans.
+- Useful for beans that are created using a third-party library or require custom initialization logic.
+
+3.**Example:**
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public EmailService emailService() {
+        return new EmailService();
+    }
+}
+
+```
+4.**Bean Registration:**
+
+Beans are registered explicitly using the `@Bean` annotation in a configuration class.
+
+![img_10.png](img_10.png)
+
+**When to Use `@Component`**
+
+- Use @Component when:
+    - The class is part of your application and follows Spring's stereotype conventions (e.g., `@Service`, `@Repository`, `@Controller`).
+    - The bean can be easily registered through component scanning.
+  
+**When to Use `@Bean`**
+
+- Use `@Bean` when:
+    - The bean needs custom logic during initialization.
+    - You need to configure third-party library beans.
+    - The class is not under your control and cannot be annotated with @Component.
+
+**Practical Example**
+
+**Scenario: Registering a** `RestTemplate`
+1. **Using**` @Component:`
+
+```java
+@Component
+public class RestTemplateComponent {
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+```
+- Less commonly used since the method needs to be static or non-annotated.
+
+2. **Using** `@Bean`
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+```
+- Preferred approach for beans like `RestTemplate` as it offers more flexibility and clarity.
+
+**Best Practices**
+
+- Use `@Component` (or its specializations like `@Service`, `@Repository`, `@Controller`) for **application-level beans** that are directly written by you.
+- Use `@Bean` for:
+  - **Third-party beans** that you can't annotate.
+  - Complex initialization scenarios.
+  - Dynamic or programmatically controlled bean creation.
+
+**Interview Insights**
+
+**Common Questions:**
+1. **Can `@Component` and `@Bean` be used interchangeably?**
+
+- No. While both result in Spring-managed beans, their use cases and contexts differ.
+2. **When would you use `@Bean` over `@Component`?**
+
+- For third-party library classes or when beans need custom initialization logic.
+3. **What happens if both `@Component` and `@Bean` define the same bean?**
+
+- Spring will throw a `BeanDefinitionOverrideException` unless explicitly allowed via configuration.
+
+### 17. Explain the use of @Configuration in Spring Boot.
+
+In Spring Boot, `@Configuration` is an annotation used to indicate that a class contains **Spring Bean definitions**. These bean definitions are processed by the Spring IoC (Inversion of Control) container to manage and provide dependencies throughout the application.
+
+It is a part of Spring's Java-based configuration approach and is an alternative to the older XML-based configuration.
 
 
+**Purpose of `@Configuration`**
+
+1. **Java-based Configuration:**
+Replaces XML-based configuration by defining beans directly in Java code.
+
+2. **Defines Beans:**
+Marks a class as a source of bean definitions using `@Bean` methods.
+
+3. **Centralized Configuration:**
+Acts as a central location to configure and manage beans.
+
+4. **Enable Dependency Injection:**
+Works seamlessly with Spring's dependency injection mechanism.
+
+**How** `@Configuration` **Works**
+
+When a class is annotated with `@Configuration`:
+
+- Spring recognizes it as a **configuration class** during component scanning.
+- The methods annotated with `@Bean` inside this class are processed, and the returned objects are registered as beans in the **Spring Application Context.**
+  
+**Example Usage of `@Configuration`**
+1. **Basic Example**
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public String greetingMessage() {
+        return "Hello, Spring Boot!";
+    }
+}
+
+```
+- Here, the `AppConfig` class is marked as a configuration class.
+- The `greetingMessage` method defines a bean of type `String` with the value `"Hello, Spring Boot!".`
+
+2. **Configuring a Third-Party Bean**
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class RestTemplateConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+```
+- The `RestTemplate` bean is manually configured and registered in the application context.
 
 
+**Features of @Configuration**
+1. **Bean Lifecycle Management:**
+Ensures that beans are managed by Spring and their lifecycle (creation, initialization, and destruction) is controlled.
+
+2. **Singleton Behavior:**
+By default, beans defined in a` @Configuration `class are **singleton**, meaning only one instance is created and shared across the application.
+
+3. **Proxy Enhancements:**
+Spring uses **CGLIB proxies** to ensure that bean definitions in the configuration class are processed correctly, even if methods are called multiple times.
 
 
+![img_11.png](img_11.png)
 
 
+**Advantages of Using `@Configuration`**
+1. **Code Readability:**
+Configuration is centralized in a single Java class, making it easier to understand.
+
+2. **Strongly Typed Configuration:**
+Unlike XML, Java-based configuration benefits from type checking and IDE support.
+
+3. **Integration with Third-Party Libraries:**
+Allows seamless integration by defining third-party beans like `RestTemplate`, `ObjectMapper`, or `DataSource`.
+
+4. **Improved Testability:**
+Java-based configurations can be modified or extended in unit tests to simulate different environments.
+
+5. **Cleaner Code:**
+Eliminates the need for verbose XML configuration.
+
+**Common Interview Questions**
+1. **What is the role of `@Configuration` in Spring Boot?**
+
+- `@Configuration` is used to define and register Spring beans in a Java-based configuration class.
+2. **What is the difference between `@Configuration` and `@Component`?**
+
+- `@Configuration` is specifically for defining bean methods, while `@Component` is for general components like services or controllers.
+3. **Can a `@Component` class have `@Bean` methods?**
+
+- Yes, but it’s not recommended as it mixes roles. `@Bean` methods should ideally reside in a `@Configuration` class.
+4. **What happens if a method in a `@Configuration` class is called multiple times?**
+
+- Spring ensures the method returns the same singleton bean instance, thanks to proxy enhancements.
 
 
+### 18. What is the purpose of @Entity in Spring Boot?
+
+In Spring Boot (and the broader Java Persistence API - JPA), the `@Entity` annotation is used to mark a Java class as a **persistent entity** or **domain model**. It indicates that the class is mapped to a table in a relational database, enabling object-relational mapping (ORM).
+
+**Purpose of** `@Entity`
+1. **Define a Database Table:**
+`@Entity` maps a Java class to a corresponding table in the database. Each instance of the class represents a row in the table.
+
+2. **Enable ORM:**
+Bridges the gap between Java objects and relational database tables using JPA.
+
+3. **Used with JPA/Hibernate:**
+It works in conjunction with other annotations like `@Table`, `@Id`, `@Column`, etc., to customize the mapping between the class and the table.
+
+**How to Use `@Entity`**
+
+To use `@Entity`, follow these steps:
+
+1. Add the `@Entity` annotation to the class.
+2. Define a primary key using the `@Id` annotation.
+3. Optionally, customize the table or column mapping with annotations like `@Table` or `@Column`.
+
+**Example: Basic Entity Class**
+```java
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class User {
+
+    @Id
+    private Long id;
+    private String name;
+    private String email;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+}
+
+```
+- Here, the `User` class is marked as an entity.
+- It maps to a table named `user` in the database.
+- The `id`, `name`, and `email` fields represent columns in the table.
+
+**Customizing Table and Column Mapping**
+
+**Using `@Table` to Customize Table Name**
+```java
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "users_table") // Custom table name
+public class User {
+
+    @Id
+    private Long id;
+    private String name;
+    private String email;
+}
+
+```
+- The `@Table` annotation customizes the table name to `users_table` instead of the default (`user`).
+
+**Using `@Column` to Customize Column Name**
+```java
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class User {
+
+    @Id
+    private Long id;
+
+    @Column(name = "full_name") // Custom column name
+    private String name;
+
+    @Column(nullable = false) // Mark as NOT NULL
+    private String email;
+}
+
+```
+- The `@Column `annotation customizes column names or constraints (e.g., `nullable`).
+
+**Why is `@Entity` Important?**
+
+1. **Object-Relational Mapping:**
+It allows Java objects to be directly mapped to database tables, simplifying CRUD operations.
+
+2. **Database Independence:**
+Applications can work with various relational databases (MySQL, PostgreSQL, etc.) without changing the Java code.
+
+3. **Works Seamlessly with JPA Repositories:**
+In Spring Boot, you can use `JpaRepository` or `CrudRepository` to perform database operations on entities.
+
+![img_12.png](img_12.png)
+
+**Spring Boot Example with Repository**
+
+**Entity Class**
+```java
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class Product {
+
+    @Id
+    private Long id;
+    private String name;
+    private Double price;
+
+    // Getters and Setters
+}
+
+```
+**Repository**
+
+```java
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product, Long> {
+}
+
+```
+**Service**
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProductService {
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+}
+
+```
+
+**Key Considerations**
+1. **Primary Key Required:**
+Every `@Entity` class must have a field marked with `@Id`.
+
+2. **Hibernate Under the Hood:**
+Spring Boot uses Hibernate as the default JPA implementation.
+
+3. **Lazy vs. Eager Loading:**
+Use `@OneToMany`, `@ManyToOne`, etc., carefully to manage how data is loaded.
+
+4. **Database Schema Generation:**
+Spring Boot can auto-generate schema using the `spring.jpa.hibernate.ddl-auto` property (e.g., `create`, `update`).
+
+**Common Interview Questions**
+1. **What is the role of `@Entity` in Spring Boot?**
+
+- It marks a class as a persistent entity mapped to a database table.
+2. **Can a class without `@Entity` be used as a database table?**
+
+- No. Without `@Entity`, the class will not be recognized by JPA as a database entity.
+3. **How does `@Entity` work with `@Table`?**
+
+- `@Table` is used to customize the table name, schema, or catalog for the entity.
+4. **What are the requirements for a class annotated with `@Entity`?**
+
+- It must have a primary key field annotated with `@Id`.
+5. **What happens if there are no tables corresponding to an `@Entity`?**
+
+- You may encounter an error unless the schema is explicitly created or auto-generation is enabled.
 
 
+### 19. How do you externalize configuration in Spring Boot?
+In Spring Boot, externalizing configuration means storing application settings (like database credentials, server ports, etc.) outside the application code, so they can be easily modified without changing the code. This flexibility allows applications to adapt to different environments, such as development, testing, or production.
+
+**Ways to Externalize Configuration**
+1. Application Properties or YAML File
+2. Command-Line Arguments
+3. Environment Variables
+4. Java System Properties
+5. Custom Configuration Files
+6. Spring Cloud Config Server
+7. `@PropertySource` for Custom Properties
+8. Programmatically Using `Environment` or `@Value`
+
+**1. Application Properties or YAML File**
+   - The most common way to externalize configuration is by using `application.properties` or application.yml in the `src/main/resources` directory.
+   
+**Example:** `application.properties`
+```
+server.port=8081
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=password
+
+```
+Example: `application.yml`
+```yaml
+server:
+  port: 8081
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb
+    username: root
+    password: password
+
+```
+- **Advantage**: Simple and supports profiles (e.g., `application-dev.properties` for development).
+
+**2. Command-Line Arguments**
+
+   You can pass properties as command-line arguments when running the application.\
+**Example:**
+```
+java -jar myapp.jar --server.port=9090 --spring.datasource.username=admin
+
+```
+- Advantage: Overrides values in a`pplication.properties.`
+
+**3. Environment Variables**\
+   Spring Boot automatically picks up configuration values from environment variables.
+
+**Example**:
+Set the following environment variables:
+```
+export SERVER_PORT=8082
+export SPRING_DATASOURCE_USERNAME=admin
+```
+- **Advantage**: Works well in containerized environments like Docker or Kubernetes.
+
+**4. Java System Properties**\
+   You can specify configuration as JVM system properties when running the application.
+
+**Example:**
+
+```
+java -Dserver.port=9090 -Dspring.datasource.username=admin -jar myapp.jar
+
+```
+- **Advantage**: Useful for quick testing and overriding defaults.
+
+**5. Custom Configuration Files**\
+   You can create custom property files and load them using @PropertySource or Spring's Environment.
+
+**Example**: Custom File (`custom-config.properties`)
+```
+custom.greeting=Hello, World!
+
+```
+**Loading with** `@PropertySource`
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+
+@Configuration
+@PropertySource("classpath:custom-config.properties")
+public class AppConfig {
+}
+
+```
+**Accessing the Property**
+```java
+@Value("${custom.greeting}")
+private String greetingMessage;
+
+```
+**6. Spring Cloud Config Server**\
+   For distributed systems, Spring Cloud Config Server provides centralized configuration management.
+
+- Store configuration in a Git repository.
+- Different applications and environments can pull their respective configurations.\
+**Example**:\
+A Git file for production: `application-prod.properties`
+```
+server.port=8083
+
+```
+**7. Using @PropertySource**\
+   `@PropertySource `is used to load custom property files into the application context.
+
+**Example**
+```java
+@Configuration
+@PropertySource("classpath:custom.properties")
+public class CustomConfig {
+}
+
+```
+**8. Accessing Properties Programmatically**\
+   You can access configuration programmatically using Environment or `@Value`.
+
+**Using** `@Value`
+```java
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ConfigService {
+
+    @Value("${server.port}")
+    private String serverPort;
+
+    public void printConfig() {
+        System.out.println("Server Port: " + serverPort);
+    }
+}
+
+```
+**Using `Environment`**
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ConfigService {
+
+    @Autowired
+    private Environment environment;
+
+    public void printConfig() {
+        System.out.println("Server Port: " + environment.getProperty("server.port"));
+    }
+}
+
+```
+
+**Profiles for Environment-Specific Configurations**\
+Spring Boot supports profiles to manage environment-specific configurations.
+
+**Example:**
+- `application-dev.properties` for development:
+
+```
+server.port=8080
+spring.datasource.url=jdbc:mysql://localhost:3306/devdb
+
+```
+- `application-prod.properties` for production:
+```
+server.port=9090
+spring.datasource.url=jdbc:mysql://localhost:3306/proddb
+
+```
+
+**Activating Profiles**
+- Using `application.properties:`
+
+```
+spring.profiles.active=dev
+
+```
+- Using command-line argument:
+```
+java -jar myapp.jar --spring.profiles.active=prod
+
+```
+**Advantages of Externalizing Configuration**
+1. **Environment-Specific Configurations:**
+Allows seamless switching between environments like dev, test, and prod.
+
+2. **Centralized Management:**
+Makes configuration changes easier without modifying code.
+
+3. **Security:**
+Sensitive information (e.g., credentials) can be externalized and secured using environment variables or secrets.
+
+4. **Flexibility:**
+Configurations can be overridden at runtime using various methods (e.g., command-line arguments).
+
+5. **Scalability:**
+Works well with cloud-native applications and containerized deployments.
 
 
+**Common Interview Questions**
+1. Why do we externalize configuration in Spring Boot?
+
+- To make applications adaptable to different environments without code changes.
+2. What is the difference between `application.properties` and `application.yml`?
+
+- Both serve the same purpose but differ in syntax; `application.yml` is more structured and hierarchical.
+3. How do you handle sensitive information like passwords?
+
+- Use environment variables, encrypted values, or external secrets management tools (e.g., AWS Secrets Manager, HashiCorp Vault).
+4. What is the role of profiles in Spring Boot?
+
+- Profiles allow environment-specific configurations, such as `dev`, `test`, or `prod`.
+5. How can you access a custom property in Spring Boot?
+
+- Using `@Value` or the `Environment` object.
+
+### 20. What is the difference between application.properties and application.yml?
+
+Both `application.properties` and `application.yml` are used in Spring Boot to configure application settings. The primary difference lies in **syntax**, **structure**, and **readability**. Here's a detailed comparison:
+
+**1. Syntax and Format**\
+       `application.properties:`
+   - **Key-Value Pair Format**\
+   Configuration is written as simple key-value pairs, where each property is specified on a separate line.\
+   Example:
+
+```
+server.port=8080
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=password
+
+```
+`application.yml:`
+
+- **YAML Format (Hierarchical)**\
+Configuration is written in YAML format, using a hierarchical structure with indentation.
+Example:
+```yaml
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb
+    username: root
+    password: password
+
+```
+- **Difference in Syntax:** YAML is more structured and uses indentation for hierarchy, while `properties` uses flat key-value pairs.
+
+**2. Readability and Maintainability**
+   - `application.properties:`\
+   Simple and straightforward, but can become hard to read and maintain for nested or complex configurations.
+
+- `application.yml:`\
+Easier to read for complex configurations due to its hierarchical structure. More suitable for nested properties.
+
+**3. Support for Nested Properties**\
+   `application.properties:`\
+   Nested properties must be written with a **dot (.) notation.**
+
+```
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=password
+
+```
+
+`application.yml:`\
+Supports **natural nesting** using indentation:
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb
+    username: root
+    password: password
+
+```
+**4. Profiles and Environment-Specific Configurations**\
+   Both formats support profiles for environment-specific configurations, but the syntax differs:
+
+`application.properties:`
+- Profiles are specified using filenames, like` application-dev.properties` or `application-prod.properties`.
+- Activate profiles via `spring.profiles.active`:
+
+```
+spring.profiles.active=dev
+
+```
+`application.yml:`
+- Profiles are embedded within the file using the `---` separator:
+
+```yaml
+spring:
+  profiles: dev
+server:
+  port: 8080
+---
+spring:
+  profiles: prod
+server:
+  port: 9090
+
+```
+**5. Error Handling**\
+   - ` application.properties:`
+   Easier to debug for syntax errors since it's simple key-value pairs.
+
+- ` application.yml:`
+YAML is strict about formatting (e.g., indentation, spacing). Improper indentation can lead to runtime errors.
+
+**6. File Size for Complex Configurations**
+   - `application.properties:`
+   May become lengthy and repetitive when dealing with hierarchical or complex configurations.
+
+- `application.yml:`
+More concise due to its hierarchical structure, reducing redundancy.
+
+**7. Compatibility**\
+   Both formats are fully supported by Spring Boot. The choice between them depends on personal or team preferences.
+
+![img_13.png](img_13.png)
+
+**Example: Same Configuration in Both Formats**\
+`application.properties`
+```
+server.port=8080
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=password
+spring.jpa.hibernate.ddl-auto=update
+
+```
+`application.yml`
+```yaml
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb
+    username: root
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+```
+**Interview Perspective**
+1. **Why does Spring Boot support both `application.properties` and `application.yml`?**
+
+- To provide flexibility. While `properties` is simple and widely used, `YAML` offers better readability for hierarchical data.
+2. **Which is better: `application.properties` or `application.yml`?**
+
+- It depends on the use case. For simple flat configurations, `properties` is sufficient, but for complex configurations, `YAML` is more maintainable.
+3. **What are the common issues when using `application.yml`?**
+
+- YAML is sensitive to indentation and spacing errors, which can cause runtime exceptions.
+4. **Can you use both formats in the same application?**
+
+- Yes. Spring Boot allows the use of both files simultaneously. Properties in `application.properties` will override those in `application.yml` if there are conflicts.
+
+### 21. How to define a custom property in Spring Boot?
+
+Defining a custom property in Spring Boot is straightforward. Spring Boot allows you to declare custom configurations in the `application.properties` or `application.yml` file, and then access these properties in your application using `@Value`, `Environment`, or custom configuration classes.
 
 
+**Steps to Define a Custom Property**
+1. Ad**d the Custom Property**
+  - In `application.properties:`
 
+  ```
+  app.custom.message=Welcome to Spring Boot!
+app.custom.version=1.0.0
+```
+- In `application.yml`:
+```yaml
+app:
+  custom:
+    message: Welcome to Spring Boot!
+    version: 1.0.0
+
+```
+
+**2. Access Custom Property in the Application**\
+   **Option 1: Using `@Value` Annotation**\
+   The `@Value` annotation directly injects the property value into a field or method.
+
+```java
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomPropertyService {
+
+    @Value("${app.custom.message}")
+    private String message;
+
+    @Value("${app.custom.version}")
+    private String version;
+
+    public void printCustomProperties() {
+        System.out.println("Message: " + message);
+        System.out.println("Version: " + version);
+    }
+}
+
+```
+**Option 2: Using `Environment` Interface**\
+The Environment interface allows you to programmatically fetch property values.
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomPropertyService {
+
+    @Autowired
+    private Environment environment;
+
+    public void printCustomProperties() {
+        String message = environment.getProperty("app.custom.message");
+        String version = environment.getProperty("app.custom.version");
+        System.out.println("Message: " + message);
+        System.out.println("Version: " + version);
+    }
+}
+```
+**Option 3: Using a Custom Configuration Class**\
+Create a POJO (Plain Old Java Object) to bind the custom properties using the `@ConfigurationProperties` annotation.
+
+**Step 1: Create a Configuration Class**
+```java
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "app.custom")
+public class CustomProperties {
+
+    private String message;
+    private String version;
+
+    // Getters and Setters
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+}
+
+```
+**Step 2: Use the Configuration Class**
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CustomPropertyService {
+
+    @Autowired
+    private CustomProperties customProperties;
+
+    public void printCustomProperties() {
+        System.out.println("Message: " + customProperties.getMessage());
+        System.out.println("Version: " + customProperties.getVersion());
+    }
+}
+
+```
+**Why Use Custom Configuration Classes?**
+1. **Type Safety**: Ensures properties are mapped correctly to fields.
+2. **Readability**: Cleaner code compared to `@Value` or `Environment`.
+3. **Reusability**: The configuration class can be reused in multiple components.
+
+
+**Validation for Custom Properties**\
+You can add validation constraints to ensure the correctness of property values.
+
+**Example: Add Validation Annotations**
+```java
+import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+@Component
+@ConfigurationProperties(prefix = "app.custom")
+@Validated
+public class CustomProperties {
+
+    @NotNull
+    private String message;
+
+    @NotNull
+    private String version;
+
+    // Getters and Setters
+}
+
+```
+**Enable Validation in the Main Application Class**
+```java
+@SpringBootApplication
+public class MyApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
+    }
+}
+
+```
+required property is missing, Spring Boot will throw a validation error at startup.
+
+**Example Output**\
+Assume the custom properties are defined as:
+
+```
+app.custom.message=Welcome to Spring Boot!
+app.custom.version=1.0.0
+
+```
+**Output:**
+```
+Message: Welcome to Spring Boot!
+Version: 1.0.0
+
+```
+
+**Common Interview Questions**
+1. How do you define and use a custom property in Spring Boot?
+
+- Define it in `application.properties` or `application.yml` and use `@Value`, `Environment`, or a custom configuration class.
+2. What is the advantage of using `@ConfigurationProperties` over `@Value`?
+
+- `@ConfigurationProperties` provides type safety, better readability, and reusability for structured configurations.
+3. How do you validate custom properties in Spring Boot?
+
+- Use `@Validated` on the configuration class and add constraints like `@NotNull`.
+4. How does Spring Boot handle missing property values?
+
+- If a property is missing, and no default value is provided, Spring Boot may throw an exception, depending on the access method used.
+
+
+### 22. What is the use of @Value annotation?
+
+The` @Value` annotation in Spring Framework is used to **inject values into fields, methods, or constructor parameters** from a variety of sources, including:
+
+- Application properties (`application.properties` or `application.yml`).
+- cSystem environment variables.
+- Inline default values.
+- SpEL (Spring Expression Language) expressions.
+
+It simplifies the process of externalizing and managing configurations for Spring-based applications.
+
+**Syntax**
+```java
+@Value("${property.key:default_value}")
+private String variableName;
+
+```
+**Primary Use Cases of `@Value`**
+1. **Injecting Values from** `application.properties` **or** `application.yml`
+   `@Value` allows you to load values directly from your configuration files.
+
+**Example**: In `application.properties:`
+```
+app.name=SpringBootApp
+app.version=1.0.0
+
+```
+In the Java class:
+```java
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class AppConfig {
+
+    @Value("${app.name}")
+    private String appName;
+
+    @Value("${app.version}")
+    private String appVersion;
+
+    public void printConfig() {
+        System.out.println("App Name: " + appName);
+        System.out.println("App Version: " + appVersion);
+    }
+}
+
+```
+**Output:**
+```yaml
+App Name: SpringBootApp
+App Version: 1.0.0
+
+```
+**2. Providing Default Values**\
+   You can provide a default value to be used when a property is not found in the configuration.
+
+**Example:**
+```java
+@Value("${app.description:No description provided}")
+private String appDescription;
+
+```
+If `app.description` is missing in the configuration file, the value will default to "No description provided".
+
+**3. Reading System Environment Variables**
+   You can inject system environment variables using `@Value`.
+
+**Example:**
+```java
+@Value("${JAVA_HOME}")
+private String javaHome;
+
+```
+**Output:**
+```
+JAVA_HOME: /usr/lib/jvm/java-11-openjdk
+
+```
+**4. Using Spring Expression Language (SpEL)**\
+   `@Value` supports SpEL expressions for dynamic evaluations.
+
+**Example:**
+```java
+@Value("#{10 + 20}")
+private int sum;
+
+@Value("#{systemProperties['user.name']}")
+private String userName;
+
+```
+**Output:**
+```yaml
+Sum: 30
+User Name: john_doe
+
+```
+**5. Injecting Lists or Arrays**
+   You can inject comma-separated values into lists or arrays.
+
+**Example:** In `application.properties:`
+
+```
+app.supportedLanguages=en,fr,de
+
+```
+
+In the Java class:
+```java
+@Value("${app.supportedLanguages}")
+private String[] supportedLanguages;
+
+```
+**Output:**
+```
+Supported Languages: [en, fr, de]
+
+```
+**Advantages of Using `@Value`**
+1. **Simplifies Configuration Management:** Easily inject configuration values without boilerplate code.
+2. **Supports Default Values:** Ensures no errors occur if a property is missing.
+3. **Dynamic Calculations:** With SpEL, you can perform calculations or fetch values dynamically.
+4. **Environment Flexibility:** Access environment variables and system properties directly.
+
+**Limitations of `@Value`**
+1. **No Type Safety**:` @Value` does not validate property types at compile-time.
+2. **Limited to Simple Configurations:** Not ideal for injecting structured configurations (e.g., nested properties).
+3. **Hard to Test:** Properties directly injected using `@Value` can be challenging to mock in unit tests.
+
+**Best Practices**
+1. Use `@Value` for simple property injections.
+2. For complex or structured configurations, prefer `@ConfigurationProperties`.
+3. Provide default values to prevent runtime errors if a property is missing.
+4. Avoid hardcoding property names; centralize them in configuration files.
+
+**Common Interview Questions**
+1. **What is `@Value` used for in Spring Boot?**
+
+- `@Value` is used to inject property values from configuration files, system environment variables, or SpEL expressions into Spring components.
+2. **How do you handle missing properties with `@Value`?**
+
+- Provide a default value using the syntax` @Value("${property.key:default_value}")`.
+3. **What are the alternatives to @Value for managing configurations in Spring Boot?**
+
+- The `@ConfigurationProperties` annotation is a better alternative for handling complex and nested configurations.
+4. **Can you inject lists or arrays using `@Value`?**
+
+- Yes, by providing comma-separated values in the configuration and mapping them to a `String[]` or `List`.
+
+
+### 23. How to use profiles in Spring Boot?
+Profiles in Spring Boot allow you to segregate parts of your application configuration and make it environment-specific. For example, you can have different configurations for **development**, **testing**, and **production** environments.
+
+**Steps to Use Profiles in Spring Boot**\
+**1. Define Profile-Specific Configuration Files**\
+   You can create separate configuration files for each profile. These files follow the naming convention:
+  ` application-{profile}.properties` or` application-{profile}.yml`.
+
+**Example:**
+
+- `application-dev.properties` (for development)
+- `application-test.properties` (for testing)
+- `application-prod.properties` (for production)
+
+**Content of** `application-dev.properties`:
+```
+server.port=8080
+spring.datasource.url=jdbc:mysql://localhost:3306/dev_db
+spring.datasource.username=dev_user
+spring.datasource.password=dev_pass
+
+```
+**Content of `application-prod.properties:`**
+
+```
+server.port=9090
+spring.datasource.url=jdbc:mysql://prod.server:3306/prod_db
+spring.datasource.username=prod_user
+spring.datasource.password=prod_pass
+
+```
+**2. Activate a Profile**
+   You can activate a specific profile using the spring.profiles.active property.
+
+**Ways to Activate a Profile:**
+
+**a. In** `application.properties`\
+Set the active profile globally:
+```
+spring.profiles.active=dev
+
+```
+**b. As a Command-Line Argument**\
+While running the application, specify the profile:
+
+```
+java -jar myapp.jar --spring.profiles.active=prod
+
+```
+**c. As an Environment Variable**\
+Set the profile as an environment variable:
+
+```
+export SPRING_PROFILES_ACTIVE=test
+
+```
+**d. Using VM Options**\
+Specify the profile in JVM options:
+```
+-Dspring.profiles.active=dev
+
+```
+**3. Use Profile-Specific Beans**\
+   You can define beans that are created only for a specific profile using the @Profile annotation.
+
+**Example:**
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+@Configuration
+public class DataSourceConfig {
+
+    @Bean
+    @Profile("dev")
+    public DataSource devDataSource() {
+        // Configure development DataSource
+        return new DataSource("jdbc:mysql://localhost:3306/dev_db", "dev_user", "dev_pass");
+    }
+
+    @Bean
+    @Profile("prod")
+    public DataSource prodDataSource() {
+        // Configure production DataSource
+        return new DataSource("jdbc:mysql://prod.server:3306/prod_db", "prod_user", "prod_pass");
+    }
+}
+
+```
+When the application is running with the `dev` profile, only `devDataSource()` will be loaded. Similarly, for the `prod` profile, only `prodDataSource()` will be loaded.
+
+**4. Use the @Profile Annotation on Classes**\
+   You can annotate entire configuration classes with `@Profile`.
+
+**Example:**
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+@Configuration
+@Profile("test")
+public class TestConfig {
+    // Beans and configurations specific to the 'test' profile
+}
+
+```
+**5. Include Multiple Profiles**\
+   You can include multiple profiles in the spring.profiles.active property by separating them with commas.
+
+**Example:**
+
+```
+spring.profiles.active=dev,test
+
+```
+This merges the configurations of the `dev` and `test` profiles.
+
+**6. Use Default Profile**\
+   If no profile is explicitly activated, the configuration in the **default profile** (in `application.properties` or` application.yml`) is used.
+
+**Example: Using Profiles in** `application.yml`
+```yaml
+spring:
+  profiles:
+    active: dev
+
+---
+
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/dev_db
+    username: dev_user
+    password: dev_pass
+
+---
+
+spring:
+  profiles: prod
+  datasource:
+    url: jdbc:mysql://prod.server:3306/prod_db
+    username: prod_user
+    password: prod_pass
+
+```
+**When to Use Profiles**
+1. Environment-Specific Configurations:
+
+   - Development (`dev`), Testing (`test`), Production (`prod`).
+2. Feature-Specific Configurations:
+
+   - Enable/disable certain features based on profiles.
+3. Test Isolation:
+
+   - Run different test configurations with profiles like `integration-test` or `unit-test`.
+
+**Advantages of Using Profiles**
+1. **Environment-Specific Behavior:** Easily manage configurations for multiple environments.
+2. **Modularity:** Simplifies switching configurations without modifying the codebase.
+3. **Flexibility:** Activate profiles dynamically at runtime.
+
+**Common Interview Questions on Profiles**
+1. **What are profiles in Spring Boot, and why are they used?**
+
+- Profiles allow environment-specific configurations to segregate settings for development, testing, and production environments.
+2. **How do you activate a profile in Spring Boot?**
+
+- Using `spring.profiles.active` property in `application.properties`, as a command-line argument, or as an environment variable.
+3. **How do you define beans specific to a profile?**
+
+- Use the `@Profile` annotation on bean definitions or configuration classes.
+4. **What happens if no profile is activated?**
+
+- The default configuration in `application.properties` or `application.yml` is used.
+
+### 24. What is the role of @Profile annotation?
+
+The `@Profile` annotation in Spring Boot is used to conditionally enable or disable **components**, **beans**, or **configuration** classes based on the currently active profile. It ensures that specific parts of the application are only loaded for certain environments, such as **development**, **testing**, or **production**.
+
+**Key Features of `@Profile`**
+1. **Environment-Specific Configurations:**
+Load different beans or configurations depending on the active profile.
+2. **Conditional Bean Creation:**
+Create beans only when the application is running with a specific profile.
+3. **Improves Modularity:**
+Separates environment-specific logic, making applications more maintainable and scalable.
+
+**How to Use `@Profile`**
+1. **On a Configuration Class**\
+   Annotate an entire configuration class with @Profile to activate it for a specific environment.
+
+**Example:**
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+@Configuration
+@Profile("dev")
+public class DevConfig {
+
+    @Bean
+    public String devBean() {
+        return "Development Bean";
+    }
+}
+
+```
+In this example, the `DevConfig` class is only active when the `dev` profile is enabled.
+
+**2. On a Bean Definition**\
+   You can annotate individual beans within a configuration class.
+
+**Example:**
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+@Configuration
+public class DataSourceConfig {
+
+    @Bean
+    @Profile("dev")
+    public DataSource devDataSource() {
+        return new DataSource("jdbc:mysql://localhost:3306/dev_db", "dev_user", "dev_pass");
+    }
+
+    @Bean
+    @Profile("prod")
+    public DataSource prodDataSource() {
+        return new DataSource("jdbc:mysql://prod.server:3306/prod_db", "prod_user", "prod_pass");
+    }
+}
+```
+When the `dev` profile is active, `devDataSource()` is used. For the prod profile, `prodDataSource()` is created instead.
+
+**3. For Multiple Profiles**\
+   You can specify multiple profiles in the `@Profile `annotation using a comma-separated list.
+
+**Example:**
+```java
+@Bean
+@Profile({"dev", "test"})
+public DataSource devAndTestDataSource() {
+    return new DataSource("jdbc:mysql://localhost:3306/test_or_dev_db", "test_user", "test_pass");
+}
+
+```
+This bean will be loaded when either the `dev` or `test` profile is active.
+
+**4. With Default Profile**\
+   When no profile is explicitly active, Spring Boot uses the configuration in the **default profile** (`application.properties` or `application.yml`).
+
+**Example:**
+```java
+@Bean
+@Profile("default")
+public DataSource defaultDataSource() {
+    return new DataSource("jdbc:mysql://localhost:3306/default_db", "default_user", "default_pass");
+}
+
+```
+**How to Activate Profiles**\
+Profiles are activated using the `spring.profiles.active` property.
+
+1. **In** `application.properties` **or** `application.yml`:
+
+```
+spring.profiles.active=dev
+
+```
+2. **Via Command Line:**
+```
+java -jar app.jar --spring.profiles.active=prod
+
+```
+3. **Environment Variable:**
+
+```
+export SPRING_PROFILES_ACTIVE=test
+
+```
+
+**Advantages of` @Profile`**
+1. **Environment-Specific Logic:**
+Allows you to separate environment configurations without altering the main code.
+2. **Reduced Complexity:**
+Eliminates the need for conditional checks (`if-else`) in the application logic.
+3. **Dynamic Switching:**
+Activate or deactivate specific beans or configurations at runtime.
+
+**Common Interview Questions on @Profile**
+1. **What is the purpose of `@Profile` in Spring Boot?**
+
+- `@Profile` is used to enable or disable components or beans based on the currently active profile.
+2. **Can you use multiple profiles with` @Profile`?**
+
+- Yes, by providing a comma-separated list of profile names in the annotation.
+3. **How do you activate a Spring profile?**
+
+- Use the `spring.profiles.active` property in configuration files, as a command-line argument, or as an environment variable.
+4. **What happens if no profile is active?**
+
+- Spring Boot falls back to the default profile (defined in `application.properties` or` application.yml`).
+
+
+### 25. How to use CommandLineRunner in Spring Boot?
+The `CommandLineRunner` interface in Spring Boot is a functional interface used to execute code after the application context has been loaded and the application has started. It provides a way to run custom code during the startup of a Spring Boot application.
+
+**Key Features of `CommandLineRunner`**
+1. **Runs Code on Application Startup:** Useful for initializing resources, loading data, or performing tasks at startup.
+2. **Simplifies Execution:** Runs after all beans are initialized and the application context is ready.
+3. **Receives Command-Line Arguments:** You can access the arguments passed to the `main()` method.
+
+
+**Implementation of `CommandLineRunner`**
+1. **Creating a Class That Implements** `CommandLineRunner`\
+   You can create a Spring Bean by implementing the CommandLineRunner interface.
+
+**Example:**
+```java
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+public class StartupRunner implements CommandLineRunner {
+
+    @Override
+    public void run(String... args) throws Exception {
+        System.out.println("Application has started!");
+        for (String arg : args) {
+            System.out.println("Argument: " + arg);
+        }
+    }
+}
+
+```
+**How It Works:**
+
+- The `run()` method is executed after the Spring Boot application has started.
+- The `args` parameter contains command-line arguments passed to the application.
+
+
+**2. Using Lambda Expressions**\
+   If you prefer concise code, you can define a CommandLineRunner bean as a lambda expression.
+
+**Example:**
+
+```java
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class StartupConfig {
+
+    @Bean
+    CommandLineRunner runner() {
+        return args -> {
+            System.out.println("Application started with arguments:");
+            for (String arg : args) {
+                System.out.println(arg);
+            }
+        };
+    }
+}
+
+```
+**Passing Command-Line Arguments**\
+You can pass arguments when running your Spring Boot application. The `CommandLineRunner` will capture these arguments in its `run()` method.
+
+**Example:** Run the application with arguments:
+
+```
+java -jar myapp.jar arg1 arg2 arg3
+
+```
+**Output:**
+```
+Application has started!
+Argument: arg1
+Argument: arg2
+Argument: arg3
+```
+
+**Use Cases for `CommandLineRunner`**\
+1. **Initializing Data:** Load initial data into the database when the application starts.
+
+```java
+@Component
+public class DataLoader implements CommandLineRunner {
+    @Override
+    public void run(String... args) throws Exception {
+        System.out.println("Loading initial data...");
+        // Add logic to populate the database
+    }
+}
+
+```
+2. **Performing Cleanup Tasks:** Execute tasks such as clearing temporary files or logs at startup.
+
+3. **Debugging or Logging:** Log application configurations or runtime details at startup.
+
+4. **Running Startup Scripts:** Execute custom scripts or tasks when the application is launched.
+
+**Differences Between `CommandLineRunner` and `ApplicationRunner`**
+- `CommandLineRunner:`
+    - Provides raw command-line arguments as a String[].
+- `ApplicationRunner`:
+  - Provides parsed command-line arguments via `ApplicationArguments`.
+Both serve the same purpose but differ in how they handle arguments.
+
+
+**Common Interview Questions on `CommandLineRunner`**
+1. **What is the purpose of `CommandLineRunner` in Spring Boot?**
+
+- It allows you to run custom code after the application context has been initialized and the application has started.
+2. **How do you access command-line arguments in `CommandLineRunner`?**
+
+- Use the `args` parameter of the `run() `method, which contains an array of String arguments.
+3. **What is the difference between `CommandLineRunner` and `ApplicationRunner`?**
+
+- `CommandLineRunner` provides raw command-line arguments, while ApplicationRunner provides parsed arguments.
+4. **Can you have multiple `CommandLineRunner` beans in a Spring Boot application?**
+
+- Yes, and they will run in the order defined by the `@Order` annotation or their default order.
 
 
 ### @Scope
