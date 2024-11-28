@@ -3064,6 +3064,813 @@ Both serve the same purpose but differ in how they handle arguments.
 
 - Yes, and they will run in the order defined by the `@Order` annotation or their default order.
 
+### 26. What is DataSource in Spring Boot?
+
+In Spring Boot, DataSource is an interface from the `javax.sql` package that provides a standard mechanism for obtaining database connections. It is used to interact with the database and retrieve connections to perform database operations like querying, updating, and managing transactions. Spring Boot simplifies the configuration of `DataSource` by auto-configuring it for you based on the underlying database type (e.g., MySQL, PostgreSQL, etc.).
+
+
+**Key Concepts of DataSource in Spring Boot**
+1. **Database Connection Pooling:**
+
+    - DataSource is typically used in conjunction with a connection pool. Connection pools manage and reuse database connections to improve performance and resource utilization.
+2. **Configuration via `application.properties` or` application.yml`:**
+
+    - Spring Boot can automatically configure a DataSource by reading the database connection properties specified in the `application.properties` or `application.yml` file.
+3. **Auto-Configuration:**
+
+    - Spring Boot auto-configures a `DataSource` based on the database driver you specify. You don't need to manually define the `DataSource` unless you need a custom configuration.
+4. **Support for Multiple Databases:**
+
+    - You can configure a `DataSource` for different database types (e.g., H2, MySQL, PostgreSQL, etc.) based on the requirements of your project.
+
+
+**How to Configure DataSource in Spring Boot**\
+**1. Using Default Configuration (Auto-Configuration)**
+   Spring Boot auto-configures a `DataSource` based on the properties in the `application.properties` or `application.yml` file. You only need to define the relevant database connection settings, and Spring Boot will automatically set up the necessary beans.
+
+**Example: Configuration for MySQL in** `application.properties:`
+
+```
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.jpa.hibernate.ddl-auto=update
+spring.datasource.jpa.show-sql=true
+
+```
+
+In this case, Spring Boot automatically configures the `DataSource` without requiring any additional code. It will use the MySQL driver and create a connection pool.
+
+
+**2. Using `DataSource` Bean Configuration**\
+   You can configure a `DataSource` manually in a Spring Boot application by creating a `@Configuration` class and defining a `@Bean` for the `DataSource`.
+
+**Example:**
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import javax.sql.DataSource;
+
+@Configuration
+public class DataSourceConfig {
+
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+        dataSource.setUsername("root");
+        dataSource.setPassword("root");
+        return dataSource;
+    }
+}
+
+```
+This configuration manually defines a `DataSource` bean and provides the connection details for MySQL.
+
+3. Using Connection Pooling with **HikariCP** (default in Spring Boot)
+   Spring Boot uses HikariCP (a high-performance JDBC connection pool) by default for database connection pooling. You can configure various parameters of HikariCP via `application.properties`.
+
+**Example of HikariCP Configuration in** a`pplication.properties:`
+
+```
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.hikari.maximum-pool-size=10
+spring.datasource.hikari.min-idle=5
+spring.datasource.hikari.idle-timeout=30000
+spring.datasource.hikari.pool-name=MyHikariCP
+
+```
+**How Does Spring Boot Handle DataSource?**
+1. **Auto-Configuration:**
+
+    - When you include a database dependency (like `spring-boot-starter-data-jpa` or `spring-boot-starter-jdbc`), Spring Boot automatically configures a `DataSource` if it is not already defined in your application.
+2. **Connection Pool Management:**
+
+    - Spring Boot leverages connection pooling (like HikariCP, Apache DBCP, or Tomcat JDBC) to manage database connections efficiently. By pooling connections, Spring Boot improves performance by reusing database connections instead of opening a new connection for each request.
+3. **Integration with JPA/Hibernate:**
+
+    - If you're using **Spring Data JPA**, Spring Boot automatically configures a `DataSource` that works with Hibernate for ORM-based data management.
+
+
+**Types of DataSource in Spring Boot**
+- **Basic DataSource:** A simple `DriverManagerDataSource` (typically used for non-production or lightweight applications).
+- **Pooled DataSource:** A more complex `HikariDataSource` (default in Spring Boot), `TomcatDataSource`, or `DBCP2DataSource` for efficient connection pooling.
+
+By default, **HikariCP** is the connection pool used in Spring Boot applications for high performance and efficient resource management.
+
+**Advantages of DataSource in Spring Boot**
+1. **Automatic Configuration:**
+
+    - Spring Boot automatically configures the `DataSource`, so you don't have to manually set up database connections and connection pools.
+2. **Connection Pooling:**
+
+    - It supports connection pooling, which minimizes the overhead of creating new database connections for every request.
+3. **Environment-Specific Configurations:**
+
+    - You can configure the `DataSource` to use different database connections based on the active profile (e.g., development, production).
+4. **Integration with JPA/Hibernate:**
+
+    - Easily integrates with Spring Data JPA and Hibernate, which simplifies ORM-based database operations.
+5. **Flexibility:**
+
+    - Spring Boot provides flexibility to configure a custom `DataSource` if needed, allowing for different database types and configurations.
+
+
+**Common Interview Questions on DataSource**
+1. **What is `DataSource` in Spring Boot?**
+
+- It is an interface used to provide a connection to a database. Spring Boot auto-configures it based on the properties defined in `application.properties` or `application.yml`.
+2. **What is the default connection pool used in Spring Boot?**
+
+- By default, Spring Boot uses HikariCP for connection pooling.
+3. **How can you configure a `DataSource` in Spring Boot?**
+
+- You can configure a `DataSource` through properties in `application.properties`, using auto-configuration, or by manually defining a `DataSource` bean in a` @Configuration` class.
+4. **What is the role of `spring.datasource.url` in Spring Boot?**
+
+- It defines the JDBC URL to connect to the database (e.g., `jdbc:mysql://localhost:3306/mydb`).
+5. **What is connection pooling, and why is it important in Spring Boot?**
+
+- Connection pooling manages a pool of database connections to improve performance and resource utilization. Spring Boot uses connection pooling (like HikariCP) to manage database connections efficiently.
+
+
+### 27. How do you configure multiple data sources in Spring Boot?
+In a Spring Boot application, you may need to connect to multiple databases. For example, you might have one database for user data and another for product information. Spring Boot supports configuring multiple data sources by defining separate `DataSource` beans for each database.
+
+**Steps to Configure Multiple Data Sources**
+1. **Add Dependencies**\
+   Include the necessary dependencies for your database and data access layer.
+
+**Example (Maven):**
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+</dependency>
+
+```
+**2. Define Properties in` application.properties` or `application.yml`**\
+   Specify connection details for each data source.
+
+**Example (Using** `application.properties`):
+
+```
+# Primary Data Source
+spring.datasource.primary.url=jdbc:mysql://localhost:3306/db_primary
+spring.datasource.primary.username=root
+spring.datasource.primary.password=root
+spring.datasource.primary.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# Secondary Data Source
+spring.datasource.secondary.url=jdbc:mysql://localhost:3306/db_secondary
+spring.datasource.secondary.username=root
+spring.datasource.secondary.password=root
+spring.datasource.secondary.driver-class-name=com.mysql.cj.jdbc.Driver
+
+```
+**3. Create Configuration Classes for Each Data Source**\
+   Create separate configuration classes to define the beans for `DataSource`, `EntityManagerFactory`, and `TransactionManager` for each database.
+
+**Primary Data Source Configuration**
+```java
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
+@Configuration
+@EnableJpaRepositories(
+    basePackages = "com.example.primary.repository", // Replace with your primary repo package
+    entityManagerFactoryRef = "primaryEntityManagerFactory",
+    transactionManagerRef = "primaryTransactionManager"
+)
+public class PrimaryDataSourceConfig {
+
+    @Bean(name = "primaryDataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.primary")
+    public DataSource primaryDataSource() {
+        return DataSourceBuilder.create().build();
+    }
+
+    @Bean(name = "primaryEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
+            @Qualifier("primaryDataSource") DataSource dataSource,
+            JpaProperties jpaProperties) {
+        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+        factory.setDataSource(dataSource);
+        factory.setPackagesToScan("com.example.primary.entity"); // Replace with your primary entity package
+        factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        factory.setJpaPropertyMap(jpaProperties.getProperties());
+        return factory;
+    }
+
+    @Bean(name = "primaryTransactionManager")
+    public PlatformTransactionManager primaryTransactionManager(
+            @Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
+    }
+}
+
+```
+**Secondary Data Source Configuration**
+```java
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
+@Configuration
+@EnableJpaRepositories(
+    basePackages = "com.example.secondary.repository", // Replace with your secondary repo package
+    entityManagerFactoryRef = "secondaryEntityManagerFactory",
+    transactionManagerRef = "secondaryTransactionManager"
+)
+public class SecondaryDataSourceConfig {
+
+    @Bean(name = "secondaryDataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.secondary")
+    public DataSource secondaryDataSource() {
+        return DataSourceBuilder.create().build();
+    }
+
+    @Bean(name = "secondaryEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(
+            @Qualifier("secondaryDataSource") DataSource dataSource,
+            JpaProperties jpaProperties) {
+        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+        factory.setDataSource(dataSource);
+        factory.setPackagesToScan("com.example.secondary.entity"); // Replace with your secondary entity package
+        factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        factory.setJpaPropertyMap(jpaProperties.getProperties());
+        return factory;
+    }
+
+    @Bean(name = "secondaryTransactionManager")
+    public PlatformTransactionManager secondaryTransactionManager(
+            @Qualifier("secondaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
+    }
+}
+```
+
+**4. Define Entities and Repositories**\
+   For each data source, define the entities and repositories in separate packages.
+
+**Example:**
+
+- **Primary Database:**
+    - Entities: `com.example.primary.entity`
+    - Repositories: `com.example.primary.repository`
+- **Secondary Database:**
+  - Entities: `com.example.secondary.entity`
+  - Repositories: `com.example.secondary.repository`
+
+**5. Accessing Multiple Data Sources**\
+   Now you can use the repositories configured for each database independently.
+
+**Example:**
+
+```java
+@Autowired
+private PrimaryRepository primaryRepository;
+
+@Autowired
+private SecondaryRepository secondaryRepository;
+
+public void performOperations() {
+    // Interact with primary database
+    primaryRepository.save(new PrimaryEntity());
+
+    // Interact with secondary database
+    secondaryRepository.save(new SecondaryEntity());
+}
+
+```
+**Key Points to Remember**
+1. **Separate Configuration:** Each `DataSource` requires separate beans for `EntityManagerFactory` and `TransactionManager`.
+2. **Define Packages Clearly:** Ensure entities and repositories are in different packages for each data source.
+3. **Profiles for Environment-Specific Configurations:** Use Spring profiles (`@Profile`) to manage data source configurations for different environments (e.g., dev, test, prod).
+4. **Connection Pooling:** Ensure each `DataSource` is configured with a connection pool for optimal performance.
+
+### 28. What is the use of the application.properties file?
+
+In Spring Boot, the `application.properties` file is a key configuration file used to customize the behavior of the application. It allows developers to define application-specific properties, settings, and configurations in a centralized and easily manageable way.
+
+The file is located in the `src/main/resources` directory of a Spring Boot project by default.
+
+**Primary Uses of application.properties**
+1. **Configure Application Settings:**
+
+   - Set properties like server port, context path, and application name.
+```
+server.port=8081
+spring.application.name=MySpringApp
+
+```
+2. **Database Configuration:**
+
+    - Define database connection details like URL, username, password, and driver class.
+
+```
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+```
+3. **Logging Configuration:**
+
+    - Control logging levels and output formats.
+
+```
+logging.level.org.springframework=DEBUG
+logging.file.name=app.log
+
+```
+4. **Profile-Specific Configuration:**
+
+    - Enable different configurations for different environments (e.g., dev, test, prod) using profiles.
+
+```
+spring.profiles.active=dev
+
+```
+
+5. **Externalize Configuration:**
+
+    - Move sensitive or environment-specific properties out of the codebase for flexibility and security.
+
+
+6. **Configure Spring Boot Modules:**
+
+    - Customize the behavior of built-in modules like Spring Data JPA, Spring Security, and others.
+
+```
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.security.user.name=admin
+spring.security.user.password=admin123
+
+```
+
+7. **Integration with Third-Party Libraries:**
+
+    - Provide settings for libraries like Kafka, Redis, RabbitMQ, and others.
+
+```
+spring.kafka.bootstrap-servers=localhost:9092
+spring.redis.host=localhost
+spring.redis.port=6379
+
+```
+
+8. **Server Configuration:**
+
+    - Configure embedded servers like Tomcat, Jetty, or Undertow.
+
+```
+server.tomcat.max-threads=200
+server.servlet.context-path=/api
+
+```
+
+**Benefits of Using `application.properties`**
+1. **Centralized Configuration:**
+
+All application-specific properties are stored in one file, making it easy to manage and modify configurations.
+2. **Simplified Customization:**
+
+Spring Boot automatically maps these properties to beans or configurations, reducing boilerplate code.
+3. **Environment-Specific Flexibility:**
+
+You can override `application.properties` with environment-specific settings using profiles (`application-dev.properties`, `application-prod.properties`).
+4. **Externalized Configuration:**
+
+By externalizing properties, you can avoid hardcoding values in the codebase, which improves security and maintainability.
+5. **Integration Support:**
+
+Simplifies the integration of third-party services and tools by providing straightforward configuration options.
+
+**Example: Configuring** `application.properties`\
+**Basic Application Properties:**
+```
+server.port=8080
+spring.application.name=DemoApp
+spring.profiles.active=dev
+
+```
+**Database Configuration:**
+```
+spring.datasource.url=jdbc:mysql://localhost:3306/demo
+spring.datasource.username=root
+spring.datasource.password=root
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+```
+
+**Logging Settings:**
+
+```
+logging.level.org.springframework=INFO
+logging.file.name=logs/demo-app.log
+
+```
+**Custom Properties:**
+```
+app.custom.message=Hello, Spring Boot!
+
+```
+**Using Custom Properties in Code:**
+```java
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomPropertyReader {
+
+    @Value("${app.custom.message}")
+    private String customMessage;
+
+    public String getCustomMessage() {
+        return customMessage;
+    }
+}
+
+```
+### 29. How do you create a RESTful API in Spring Boot?
+Creating a RESTful API in Spring Boot involves the following steps. Below is a detailed guide to building a simple API to manage resources like `Employee`.\
+
+**Step 1: Setup a Spring Boot Project**
+1. **Generate a Spring Boot Project:**
+
+    - Use [Spring Initializr](https://start.spring.io/) or your IDE to create a new Spring Boot project.
+    - Include the following dependencies:
+      - **Spring Web** (for building REST APIs).
+      - **Spring Data JPA** (for data persistence, optional if working with a database).
+      - **H2 Database** or any other database dependency (optional).
+2. **Directory Structure:**
+```
+src/main/java/com/example/demo
+├── controller
+├── model
+├── repository
+└── service
+
+```
+**Step 2: Define the Model**\
+Create a Java class representing the resource (e.g., `Employee`).
+
+```java
+package com.example.demo.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String role;
+
+    // Constructors, Getters, Setters
+    public Employee() {}
+    
+    public Employee(String name, String role) {
+        this.name = name;
+        this.role = role;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+}
+
+```
+**Step 3: Create the Repository**\
+Use Spring Data JPA to create a repository interface.
+```java
+package com.example.demo.repository;
+
+import com.example.demo.model.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+}
+
+```
+**Step 4: Implement the Service Layer (Optional)**\
+Service layers are often used to manage business logic.
+```java
+package com.example.demo.service;
+
+import com.example.demo.model.Employee;
+import com.example.demo.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class EmployeeService {
+
+    @Autowired
+    private EmployeeRepository repository;
+
+    public List<Employee> getAllEmployees() {
+        return repository.findAll();
+    }
+
+    public Optional<Employee> getEmployeeById(Long id) {
+        return repository.findById(id);
+    }
+
+    public Employee createEmployee(Employee employee) {
+        return repository.save(employee);
+    }
+
+    public void deleteEmployee(Long id) {
+        repository.deleteById(id);
+    }
+}
+
+```
+**Step 5: Create the Controller**\
+Define a REST controller to handle HTTP requests.
+```java
+package com.example.demo.controller;
+
+import com.example.demo.model.Employee;
+import com.example.demo.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/employees")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    // Get all employees
+    @GetMapping
+    public List<Employee> getAllEmployees() {
+        return employeeService.getAllEmployees();
+    }
+
+    // Get an employee by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        return employeeService.getEmployeeById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Create a new employee
+    @PostMapping
+    public Employee createEmployee(@RequestBody Employee employee) {
+        return employeeService.createEmployee(employee);
+    }
+
+    // Delete an employee
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+```
+**Step 6: Configure `application.properties`**\
+Set up the database connection and server configurations.
+```
+# H2 database configuration
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=password
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+# Server configuration
+server.port=8080
+
+```
+**Step 7: Run the Application**\
+1. Run the Spring Boot application using your IDE or the command:
+```
+mvn spring-boot:run
+
+```
+2. **Access the API using tools like** Postman **or** cURL**:**
+
+- **Get all employees:** `GET http://localhost:8080/api/employees`
+- **Get employee by ID:** `GET http://localhost:8080/api/employees/{id}`
+- **Create a new employee:**
+```json
+POST http://localhost:8080/api/employees
+{
+  "name": "John Doe",
+  "role": "Developer"
+}
+
+```
+- **Delete an employee:** `DELETE http://localhost:8080/api/employees/{id}`
+
+**Key Annotations Used**
+1. **@RestController:** Defines a controller where every method returns a JSON response.
+2. **@RequestMapping:** Maps the base URL for the API.
+3. **@GetMapping,** **@PostMapping**, **@DeleteMapping**: Map HTTP methods (GET, POST, DELETE) to specific endpoints.
+4. **@PathVariable**: Captures dynamic values from the URI.
+5. **@RequestBody:** Maps the body of HTTP requests to Java objects.
+
+
+
+### 30. What is the role of @PostMapping?
+
+The `@PostMapping` annotation in Spring Boot is used to handle HTTP **POST** requests in a RESTful web service. It is a specialization of the `@RequestMapping` annotation, specifically for **POST** requests, which are typically used to **create** or **submit resources** to the server.
+
+**Key Features of @PostMapping**
+1. **Maps POST Requests:**
+
+    - It maps HTTP POST requests to a specific method in a Spring controller.
+2. **Syntactic Sugar:**
+
+    - It is a more concise and readable alternative to using `@RequestMapping` with the `method = RequestMethod.POST` option.
+3. **Accepts Request Data:**
+
+    - It can handle input data sent in the request body in formats like JSON, XML, or form data.
+4. **Facilitates Resource Creation:**
+
+    - Commonly used in RESTful APIs for creating new resources on the server.
+
+**Basic Syntax**
+
+```java
+@PostMapping("/path")
+public ResponseEntity<Object> methodName(@RequestBody Object requestData) {
+    // Handle the POST request
+}
+
+```
+**Example Usage**\
+**1. Creating a New Resource**
+   A method to create a new `Employee` resource:
+
+```java
+@RestController
+@RequestMapping("/api/employees")
+public class EmployeeController {
+
+    @PostMapping
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+        // Simulate saving the employee
+        employee.setId(1L); // Simulate generated ID
+        return ResponseEntity.ok(employee);
+    }
+}
+
+```
+**Request Example:**\
+POST request to `http://localhost:8080/api/employees`
+
+```json
+{
+  "name": "John Doe",
+  "role": "Developer"
+}
+
+```
+**Response Example:**
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "role": "Developer"
+}
+
+```
+
+![img_14.png](img_14.png)
+
+**Handling Input Data with `@PostMapping`**
+1. **Using** `@RequestBody`:
+
+    - Maps the request body to a Java object.
+    - Example:
+```java
+@PostMapping("/employees")
+public ResponseEntity<Employee> addEmployee(@RequestBody Employee employee) {
+    // Logic to save the employee
+    return ResponseEntity.ok(employee);
+}
+
+```
+2. **Using `@RequestParam:`**
+
+    - Extracts form or query parameters from the request.
+    - Example:
+
+```java
+@PostMapping("/employees")
+public ResponseEntity<String> addEmployee(@RequestParam String name, @RequestParam String role) {
+    return ResponseEntity.ok("Employee added: " + name + ", Role: " + role);
+}
+
+```
+3. **Using Headers:**
+
+    - Access additional metadata passed in headers using `@RequestHeader`.
+    - Example:
+
+```java
+@PostMapping("/employees")
+public ResponseEntity<String> addEmployee(@RequestHeader("Authorization") String token) {
+    return ResponseEntity.ok("Token received: " + token);
+}
+
+```
+**Advantages of `@PostMapping`**
+1. **Readability:**
+
+    - Makes the code more intuitive and easier to understand.
+2. **Specificity:**
+
+    - Dedicated to handling POST requests, avoiding ambiguity in method mapping.
+3. **Simplified Input Mapping:**
+
+    - Seamlessly integrates with `@RequestBody`, `@RequestParam`, and other annotations to handle request data.
+
+
+**When to Use` @PostMapping`**
+- To **create new resources** on the server, such as adding new records to a database.
+- To **submit data** for processing, such as form data or JSON payloads.
+- In RESTful APIs, to implement **Create** operations in the CRUD paradigm.
+
+
+
+
 
 ### @Scope
 - scope annotations define the lifecycle and visibility of beans. By default, Spring beans are singleton, but you can use different scope annotations to modify the behavior according to your needs.
