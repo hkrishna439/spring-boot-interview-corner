@@ -9511,6 +9511,925 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 ```
 
+### 67. Explain service discovery using Eureka.
+
+Service discovery is a critical concept in microservices architectures, enabling microservices to dynamically locate and communicate with one another without hardcoding service addresses. **Eureka**, a component of Netflix OSS, provides a solution for service discovery and registration.
+
+Eureka operates in a client-server model:
+
+* **Eureka Server** acts as a service registry.
+* **Eureka Client** registers itself with the server and queries it for other services.
+
+
+**Key Components of Eureka**
+1. **Eureka Server:**
+
+   * Centralized registry where microservices (clients) register their instances.
+   * Keeps track of all active services and their locations (IP and port).
+   * Provides an API for clients to discover other services dynamically.
+
+2. **Eureka Client:**
+
+   * A microservice that registers itself with the Eureka Server during startup.
+   * Periodically sends heartbeat signals to let the server know it's alive.
+   * Queries the Eureka Server to discover other registered services for communication.
+
+3. **Service Registry:**
+
+   * A database maintained by Eureka Server, storing information about all active services and their instances.
+
+
+**How Eureka Works**
+1. **Service Registration:**
+
+    - When a microservice starts, it registers itself with the Eureka Server by providing its metadata (e.g., name, IP, port, health check URL).
+2. **Heartbeat Mechanism:**
+
+    - Registered services send periodic heartbeats to the Eureka Server.
+    - If a service fails to send heartbeats within a specified time, Eureka marks it as unavailable and removes it from the registry.
+3. **Service Discovery:**
+
+   * A microservice queries the Eureka Server to get the address of another service it needs to call.
+   * Eureka returns the instances of the requested service.
+4. **Client-Side Load Balancing:**
+
+    - Eureka can work with Ribbon (a Netflix OSS load balancer) to distribute requests across multiple instances of a service.
+
+
+
+**Advantages of Eureka**
+1. **Dynamic Discovery:**
+
+    - Microservices can discover each other dynamically at runtime, eliminating the need for hardcoded service endpoints.
+2. **Fault Tolerance:**
+
+    - If an instance becomes unavailable, it is removed from the registry, ensuring only healthy instances are discovered.
+3. **Scalability:**
+
+    - Supports multiple instances of a service, enabling easy scaling.
+4. **Decentralized Communication:**
+
+    - Eureka enables microservices to communicate without depending on a central configuration.
+
+**Code Example: Implementing Eureka**
+1. **Setting Up Eureka Server**
+- Add the following dependencies to the `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+</dependency>
+```
+
+- Annotate the main class with `@EnableEurekaServer`:
+
+```java
+@EnableEurekaServer
+@SpringBootApplication
+public class EurekaServerApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(EurekaServerApplication.class, args);
+    }
+}
+```
+- Add the configuration in `application.yml`
+```yaml
+server:
+  port: 8761
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+```
+2. **Setting Up Eureka Client**
+- Add the Eureka Client dependency:
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+
+```
+- Annotate the main class with `@EnableEurekaClient`:
+```java
+@EnableEurekaClient
+@SpringBootApplication
+public class ProductServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ProductServiceApplication.class, args);
+    }
+}
+
+```
+- Add the client configuration in `application.yml`:
+
+```yaml
+server:
+  port: 8081
+spring:
+  application:
+    name: product-service
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+```
+
+3. **Discovering Services**
+   In another microservice, you can discover and call the `product-service` using the `RestTemplate`:
+
+```java
+@Autowired
+private RestTemplate restTemplate;
+
+public String getProductDetails() {
+    String url = "http://product-service/api/products";
+    return restTemplate.getForObject(url, String.class);
+}
+```
+- Configure `RestTemplate` with Load Balancer:
+
+```java
+@Bean
+@LoadBalanced
+public RestTemplate restTemplate() {
+    return new RestTemplate();
+}
+```
+**Eureka Dashboard**
+- The Eureka Server provides a dashboard at `http://localhost:8761` where you can see all registered services and their statuses.
+
+**Advantages of Eureka in Microservices**
+1. **Decoupling:**
+
+    - Services do not need hardcoded addresses, reducing coupling.
+2. **High Availability:**
+
+    - Eureka supports clusters of Eureka Servers for fault tolerance.
+3. **Ease of Scaling:**
+
+    - Multiple instances of the same service can register, enabling seamless scaling.
+4. **Integration:**
+
+    - Works well with other Spring Cloud components, like Ribbon for load balancing and Hystrix for circuit breaking.
+
+### 68. What is Spring Boot Zuul?
+
+Spring Boot **Zuul** is a component of the Netflix OSS suite integrated with Spring Cloud. It acts as an **API Gateway**, providing intelligent routing, filtering, and load balancing for microservices-based architectures. Zuul serves as the entry point for all client requests in a microservices system, routing them to the appropriate backend service.
+
+
+**Key Features of Zuul**
+1. **Routing:**
+
+    - Routes client requests to the correct microservice based on configured rules.
+2. **Dynamic Routing:**
+
+    - Allows requests to be dynamically routed to different services based on runtime conditions.
+3. **Load Balancing:**
+
+    - Integrates with tools like Ribbon for client-side load balancing.
+4. **Filters:**
+
+    - Supports pre, post, and error filters to modify requests and responses.
+5. **Security:**
+
+    - Acts as a central point for implementing authentication, authorization, and logging.
+6. **Fault Tolerance:**
+
+    - Can handle failure scenarios with fallbacks and retries.
+7. **Monitoring and Insights:**
+
+    - Collects data about requests for monitoring and analysis.
+
+
+**Why Use Zuul?**
+* Provides a unified entry point for all client interactions.
+* Reduces coupling between client applications and microservices.
+* Simplifies cross-cutting concerns like authentication, logging, and rate limiting.
+* Improves scalability and fault tolerance through load balancing and retries.
+
+**How Does Zuul Work?**
+1. **Client Request:**
+
+    - A client sends a request to the Zuul API Gateway.
+2. **Request Routing**:
+
+    - Zuul inspects the request and forwards it to the appropriate microservice.
+3. **Filters:**
+
+    - Zuul applies pre-defined filters (e.g., authentication, logging) before or after routing.
+4. **Response Handling:**
+
+    - Zuul collects the response from the microservice and sends it back to the client.
+
+**Setting Up Zuul in a Spring Boot Application**\
+**Step 1: Add Zuul Dependency**\
+Add the following dependency in your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
+</dependency>
+```
+
+**Step 2: Enable Zuul**\
+Annotate the main application class with `@EnableZuulProxy`:
+```java
+@EnableZuulProxy
+@SpringBootApplication
+public class ZuulGatewayApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ZuulGatewayApplication.class, args);
+    }
+}
+
+```
+**Step 3: Configure Routing**\
+Add routing configurations in `application.yml`:
+
+```yaml
+server:
+  port: 8080
+
+zuul:
+  routes:
+    product-service:
+      path: /products/**
+      url: http://localhost:8081
+    order-service:
+      path: /orders/**
+      url: http://localhost:8082
+```
+In this example:
+
+* Requests to `/products/**` are routed to the `product-service` running on port 8081.
+* Requests to `/orders/**` are routed to the `order-service` running on port 8082.
+
+**Step 4: Run and Test**
+* Start the Zuul application and the microservices (`product-service` and `order-service`).
+* Access services via the Zuul gateway:
+  * `http://localhost:8080/products`
+  * `http://localhost:8080/orders`
+
+**Using Filters in Zuul**\
+Filters allow you to intercept and modify requests and responses.\
+
+**Example: Custom Pre-Filter**
+```java
+@Component
+public class PreFilter extends ZuulFilter {
+
+    @Override
+    public String filterType() {
+        return "pre"; // Types: pre, post, route, error
+    }
+
+    @Override
+    public int filterOrder() {
+        return 1; // Priority of the filter
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        return true; // Whether to execute this filter
+    }
+
+    @Override
+    public Object run() throws ZuulException {
+        RequestContext context = RequestContext.getCurrentContext();
+        HttpServletRequest request = context.getRequest();
+        System.out.println("Request Method: " + request.getMethod());
+        System.out.println("Request URL: " + request.getRequestURL().toString());
+        return null;
+    }
+}
+```
+
+**Zuul vs Spring Cloud Gateway**\
+While Zuul is widely used, **Spring Cloud Gateway** is a modern alternative with better integration and support for reactive programming. Key differences:
+
+* **Zuul:** Built on Servlet-based architecture.
+* **Spring Cloud Gateway**: Built on reactive programming (Project Reactor).
+
+**Advantages of Using Zuul**
+1. **Unified Access:**
+
+    - Acts as a single point of entry for multiple services.
+2. **Decoupling:**
+
+    - Hides the details of backend microservices from clients.
+3. **Scalability:**
+
+    - Supports dynamic service discovery and load balancing.
+4. **Customizable:**
+
+    - Filters can be implemented to customize routing and processing.
+5. **Integration:**
+
+    - Works seamlessly with Spring Cloud, Ribbon, and Eureka.
+
+**Limitations of Zuul**
+1. **Performance:**
+
+    - Based on blocking I/O, which may cause bottlenecks in high-concurrency environments.
+2. **Lack of Reactive Support:**
+
+    - Limited support for modern reactive programming.
+3. **Deprecation:**
+
+    - Netflix has deprecated Zuul 1, and Spring Cloud recommends using Spring Cloud Gateway for new applications.
+
+### 69. How to implement circuit breaker patterns using Spring Boot?
+The **circuit breaker pattern** is a microservices resilience pattern designed to prevent system failures when a service becomes unavailable, slow, or unreliable. It monitors service calls and can stop unnecessary retries when failures occur, allowing the system to recover.
+
+Spring Boot supports the circuit breaker pattern through libraries like **Resilience4j**, which integrates seamlessly with Spring Boot.
+
+**Steps to Implement Circuit Breaker Pattern in Spring Boot Using Resilience4j**\
+**Step 1: Add Dependencies**\
+Add the following dependencies to your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>io.github.resilience4j</groupId>
+    <artifactId>resilience4j-spring-boot3</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+```
+**Step 2: Configure Resilience4j**\
+Add the circuit breaker configuration to the `application.yml` file:
+```yaml
+resilience4j:
+  circuitbreaker:
+    instances:
+      myService:
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000 # in milliseconds
+        permittedNumberOfCallsInHalfOpenState: 2
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+```
+Explanation:
+
+* **slidingWindowSize:** Number of calls in the sliding window to evaluate failures.
+* **failureRateThreshold:** Failure percentage after which the circuit breaker opens.
+* **waitDurationInOpenState**: Time the circuit breaker stays open before transitioning to half-open.
+* **permittedNumberOfCallsInHalfOpenState**: Number of test calls allowed in half-open state.
+* **automaticTransitionFromOpenToHalfOpenEnabled**: Automatically transitions to half-open after the wait duration.
+
+**Step 3: Annotate Methods with @CircuitBreaker**\
+Annotate the method where you want to apply the circuit breaker:
+
+```java
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class MyService {
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @CircuitBreaker(name = "myService", fallbackMethod = "fallbackResponse")
+    public String callExternalService() {
+        // Simulate an external service call
+        return restTemplate.getForObject("http://external-service/api", String.class);
+    }
+
+    // Fallback method
+    public String fallbackResponse(Throwable throwable) {
+        return "Fallback response: External service is unavailable.";
+    }
+}
+```
+* **@CircuitBreaker:** Specifies the name of the circuit breaker instance.
+* **fallbackMethod:** Specifies the method to call when the circuit breaker is open or an error occurs.
+
+**Step 4: Enable Circuit Breaker**\
+Ensure that circuit breaker support is enabled in your Spring Boot application. This is typically done by adding the following annotation to your main application class:
+```java
+@SpringBootApplication
+@EnableAspectJAutoProxy
+public class CircuitBreakerApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(CircuitBreakerApplication.class, args);
+    }
+}
+```
+**Testing the Circuit Breaker**
+1. **Normal State:**
+
+    - The external service is reachable, and the `callExternalService` method works normally.
+2. **Failure State:**
+
+    - If the external service fails repeatedly (based on the configured failure rate and sliding window size), the circuit breaker opens, and calls are redirected to the fallback method.
+3. **Recovery:**
+
+    - After the wait duration, the circuit breaker transitions to half-open, allowing test calls to determine if the service has recovered. If successful, it closes; otherwise, it reopens.
+
+**Monitoring and Insights**\
+**Step 1: Enable Actuator**\
+Add the Spring Boot Actuator dependency for monitoring:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+**Step 2: Access Circuit Breaker Metrics**\
+Resilience4j exposes metrics via Actuator endpoints. For example:
+
+* `http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.calls`
+* `http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state`
+
+These endpoints provide detailed insights into circuit breaker performance.
+
+**Advantages of Using Circuit Breaker Pattern**
+1. **Prevents Cascading Failures:**
+
+    - Stops continuous retries when a service is down, reducing system load.
+2. **Improves Resilience:**
+
+    - Allows the system to recover gracefully during failures.
+3. **Better User Experience:**
+
+    - Returns fallback responses instead of errors during failures.
+4. **Dynamic Monitoring:**
+
+    - Provides real-time insights into service health and failures.
+
+### 70. What is Spring Boot RabbitMQ integration?
+
+Spring Boot RabbitMQ integration provides a seamless way to connect Spring Boot applications with **RabbitMQ**, a popular message broker that facilitates asynchronous communication between microservices or distributed systems. Spring Boot simplifies RabbitMQ integration through **Spring AMQP** (Advanced Message Queuing Protocol) by offering pre-configured templates and support for publishing and consuming messages.
+
+**Why Use RabbitMQ with Spring Boot?**
+* **Decoupling Services:** Enables asynchronous communication, reducing direct dependencies between microservices.
+* **Scalability:** Supports distributed systems and load balancing through message queues.
+* **Reliability**: Ensures message delivery with features like acknowledgments, retries, and dead-letter queues.
+* **Flexibility**: Supports multiple messaging patterns like publish-subscribe, request-reply, and point-to-point.
+
+**Key Components of RabbitMQ**
+1. **Exchange:**
+
+  * Routes messages to queues based on routing keys.
+  * Types: Direct, Fanout, Topic, Headers.
+2. **Queue:**
+
+  * A buffer that holds messages for consumption by subscribers.
+3. **Binding:**
+
+  * Links an exchange to a queue using a routing key.
+4. **Producer:**
+
+  * Sends messages to RabbitMQ.
+5. **Consumer:**
+
+  * Receives messages from RabbitMQ.
+
+**Steps to Integrate RabbitMQ in Spring Boot**\
+**Step 1: Add Dependencies**\
+Add the RabbitMQ dependency in your pom.xml:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-amqp</artifactId>
+</dependency>
+```
+**Step 2: Configure RabbitMQ**\
+Set up RabbitMQ properties in `application.yml` or `application.properties`
+
+```yaml
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+```
+**Step 3: Define RabbitMQ Configuration**\
+Create a configuration class to define queues, exchanges, and bindings:
+
+```java
+import org.springframework.amqp.core.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class RabbitMQConfig {
+
+    public static final String QUEUE = "myQueue";
+    public static final String EXCHANGE = "myExchange";
+    public static final String ROUTING_KEY = "myRoutingKey";
+
+    @Bean
+    public Queue queue() {
+        return new Queue(QUEUE);
+    }
+
+    @Bean
+    public DirectExchange exchange() {
+        return new DirectExchange(EXCHANGE);
+    }
+
+    @Bean
+    public Binding binding(Queue queue, DirectExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
+    }
+}
+```
+**Step 4: Implement Producer**\
+Create a producer to send messages:
+```java
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class RabbitMQProducer {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    public void sendMessage(String message) {
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY, message);
+        System.out.println("Message sent: " + message);
+    }
+}
+```
+**Step 5: Implement Consumer*\*
+Create a listener to consume messages:
+
+```java
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Service;
+
+@Service
+public class RabbitMQConsumer {
+
+    @RabbitListener(queues = RabbitMQConfig.QUEUE)
+    public void receiveMessage(String message) {
+        System.out.println("Message received: " + message);
+    }
+}
+```
+
+**Step 6: Test the Integration**\
+Use a REST controller or service to trigger message sending:
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/rabbitmq")
+public class RabbitMQController {
+
+    @Autowired
+    private RabbitMQProducer producer;
+
+    @PostMapping("/publish")
+    public String sendMessage(@RequestParam String message) {
+        producer.sendMessage(message);
+        return "Message sent to RabbitMQ!";
+    }
+}
+```
+* Start your Spring Boot application.
+* Use a REST client (e.g., Postman) to send a POST request to `/rabbitmq/publish?message=HelloWorld`.
+* Observe logs for sent and received messages.
+
+**Advanced Configurations**\
+**1. Message Conversion**\
+   Spring AMQP supports automatic conversion of Java objects to JSON:
+
+```java
+rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+
+```
+**2. Acknowledgments**\
+   Configure manual acknowledgments for messages:
+
+```java
+@RabbitListener(queues = RabbitMQConfig.QUEUE, ackMode = "MANUAL")
+public void receiveMessage(Message message, Channel channel) throws IOException {
+    System.out.println("Message received: " + new String(message.getBody()));
+    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+}
+```
+**3. Dead-Letter Queues**\
+   Handle undelivered messages by configuring dead-letter queues:
+
+```yaml
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+    queues:
+      myQueue:
+        arguments:
+          x-dead-letter-exchange: deadLetterExchange
+          x-dead-letter-routing-key: deadLetterKey
+```
+**Advantages of Spring Boot RabbitMQ Integration**
+* **Simplified Configuration**: Easy setup using Spring Boot starters and properties.
+* **High Performance**: Efficient handling of message queues and routing.
+* **Scalability**: Supports distributed and scalable messaging systems.
+* **Flexibility**: Offers advanced options like retries, dead-letter queues, and JSON conversion.
+* **Built-in Error Handling**: Supports retries, acknowledgments, and custom error strategies.
+
+### 71. How to use Kafka with Spring Boot?
+
+Spring Boot provides seamless integration with **Apache Kafka**, a distributed event-streaming platform that supports real-time data processing, message brokering, and log aggregation. By using **Spring Kafka**, you can easily set up producers, consumers, and topic configurations in a Spring Boot application.
+
+**Steps to Use Kafka with Spring Boot**\
+**Step 1: Add Dependencies**\
+Add the Spring Kafka and Kafka Client dependencies to your pom.xml:
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka</artifactId>
+</dependency>
+```
+**Step 2: Kafka Configuration**\
+Set up Kafka properties in application.yml or `application.properties`:
+
+```yaml
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: my-group
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+```
+**Step 3: Create Kafka Topics**\
+You can programmatically create Kafka topics using a configuration class:
+```java
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class KafkaTopicConfig {
+
+    @Bean
+    public NewTopic exampleTopic() {
+        return new NewTopic("example-topic", 3, (short) 1);
+    }
+}
+```
+**Step 4: Implement a Kafka Producer**\
+Create a producer service to send messages to Kafka:
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+public class KafkaProducer {
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    public void sendMessage(String topic, String message) {
+        kafkaTemplate.send(topic, message);
+        System.out.println("Message sent: " + message);
+    }
+}
+```
+**Step 5: Implement a Kafka Consumer**\
+Create a consumer service to listen for messages:
+```java
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+@Service
+public class KafkaConsumer {
+
+    @KafkaListener(topics = "example-topic", groupId = "my-group")
+    public void listen(String message) {
+        System.out.println("Message received: " + message);
+    }
+}
+```
+**Step 6: Test the Kafka Integration**\
+Create a REST controller to trigger message production:
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/kafka")
+public class KafkaController {
+
+    @Autowired
+    private KafkaProducer kafkaProducer;
+
+    @PostMapping("/publish")
+    public String sendMessage(@RequestParam String message) {
+        kafkaProducer.sendMessage("example-topic", message);
+        return "Message sent to Kafka topic!";
+    }
+}
+```
+
+**Advanced Configurations**
+1. **Kafka Template with Custom Serializers**\
+   You can configure custom serializers/deserializers for specific use cases:
+
+```java
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+public class KafkaProducerConfig {
+
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+}
+
+```
+2. **Kafka Consumer with Manual Acknowledgments**\
+   If you want more control over message consumption, use manual acknowledgments:
+
+```java
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ManualKafkaConsumer {
+
+    @KafkaListener(topics = "example-topic", groupId = "my-group")
+    public void listenWithAcknowledgment(ConsumerRecord<String, String> record, Acknowledgment acknowledgment) {
+        System.out.println("Message received: " + record.value());
+        acknowledgment.acknowledge(); // Acknowledge the message
+    }
+}
+
+```
+3. **Error Handling**\
+   Configure error-handling mechanisms for consumers:
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+
+@Configuration
+public class KafkaErrorHandlerConfig {
+
+    @Bean
+    public DefaultErrorHandler errorHandler() {
+        return new DefaultErrorHandler();
+    }
+}
+
+```
+**Monitoring Kafka**
+1. **Spring Boot Actuator**: Exposes Kafka-related metrics via endpoints.
+2. **Kafka Manager Tools**: Tools like **Kafka UI**, **Conduktor**, or **Lenses**.io for monitoring.
+
+**Key Kafka Use Cases with Spring Boot**
+1. **Event-Driven Architectures:**
+    - Real-time processing of user actions, logs, or IoT events.
+2. **Asynchronous Messaging:**
+   - Decouple services to improve scalability.
+3. **Stream Processing:**
+   - Aggregate and process data streams using Kafka Streams.
+
+### 72. What is the role of DevTools in Spring Boot?
+Spring Boot **DevTools** is a developer-friendly module designed to improve productivity during the development phase. It provides features like automatic application restarts, live reloading, and easier debugging, which streamline the development workflow.
+
+**Key Features of Spring Boot DevTools**
+1. **Automatic Restart:**
+
+    - **Role**: Automatically restarts the application whenever a classpath file is modified (e.g., changes to `.java` or `.properties` files).
+    - **Benefit**: Eliminates the need to manually restart the application, reducing the development cycle time.
+2. **Live Reload:**
+
+    - **Role**: Integrates with tools like **LiveReload** to refresh the browser automatically when front-end resources (e.g., HTML, CSS, or JavaScript) are modified.
+    - **Benefit**: Provides instant visual feedback for front-end changes.
+3. **Property Defaults for Development:**
+
+    - **Role**: Applies developer-friendly defaults to ease testing and debugging.
+        - For example, caching is disabled for templates like **Thymeleaf** or **Freemarker**.
+    - **Benefit**: Avoids needing to clear caches during iterative development.
+4. **Remote Debugging Support:**
+
+    - **Role**: Allows remote debugging by restarting only specific parts of the application in a remote environment.
+    - **Benefit**: Helps diagnose issues in non-local setups.
+5. **Hotswapping:**
+
+    - **Role**: Works with libraries like JRebel or Spring Loaded for more advanced hot code replacement during runtime.
+    - **Benefit**: Faster iterations for code changes without full application restarts.
+6. **Environment-Specific Customizations:**
+
+    - **Role**: Enables customization of behavior specifically for the development environment.
+    - **Benefit**: Keeps development settings separate from production configurations.
+7. **Disabling in Production:**
+
+    - **Role**: Automatically deactivates in production environments to avoid unnecessary resource overhead.
+    - **Benefit**: Ensures optimal performance in production.
+
+**How to Add and Use Spring Boot DevTools**
+1. **Add Dependency:** Include the `spring-boot-devtools` dependency in your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+The `runtime` scope ensures it is excluded from production builds.
+
+2. **Enable Features:** DevTools is enabled by default. For live reload, install a **LiveReload browser** **extension** or use an IDE with built-in support (e.g., IntelliJ IDEA).
+
+3. **Custom Configurations:** You can control behavior using properties in application.properties or application.yml:
+
+```
+spring.devtools.restart.enabled=true   # Enable/disable automatic restarts
+spring.devtools.livereload.enabled=true # Enable/disable LiveReload
+spring.thymeleaf.cache=false          # Disable template caching for development
+```
+
+**Advantages of DevTools**
+* **Faster Feedback Loop:** Reduces the time taken to see changes in action.
+* **Simplified Debugging:** Environment-friendly defaults minimize configuration overhead.
+* **Enhanced Productivity:** Automates repetitive tasks like restarting the application.
+
+**Limitations**
+* Not recommended for production environments.
+* Automatic restarts might not work efficiently in large applications with extensive codebases.
+* For advanced hot code replacements, additional tools like **JRebel** may be needed.
+
+### 73. How do you enable hot reload in Spring Boot?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### @Scope
