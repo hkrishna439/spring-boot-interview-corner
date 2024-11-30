@@ -3022,7 +3022,7 @@ Argument: arg2
 Argument: arg3
 ```
 
-**Use Cases for `CommandLineRunner`**\
+**Use Cases for `CommandLineRunner`**
 1. **Initializing Data:** Load initial data into the database when the application starts.
 
 ```java
@@ -5420,7 +5420,7 @@ spring.datasource.username=postgres
 spring.datasource.password=postgres
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 ```
-**8. Advanced Configurations**\
+**8. Advanced Configurations**
 - **Named Queries:** Define custom SQL queries using `@Query` in the repository interface.
 
 ```java
@@ -7398,7 +7398,7 @@ Here, the test starts the Spring Boot application on a random port and uses Test
 * **End-to-End Testing:** If you want to test the complete flow of an application, including database, web server, and components, `@SpringBootTest` is the ideal choice.
 * **Component Interactions:** If you're testing how your beans (components) interact with each other, you should load the full Spring context using `@SpringBootTest`.
 
-**Limitations**\
+**Limitations**
 * **Performance:** Since `@SpringBootTest` loads the entire application context, it can be slower than unit tests. For simple unit tests, it is more efficient to use other annotations like `@WebMvcTest` (for controllers) or `@DataJpaTest` (for repositories).
 * **Complexity:** If the application context is large, it may be more complex and time-consuming to manage.
 
@@ -7411,7 +7411,7 @@ Here's how you can perform integration testing in Spring Boot:
 **1. Using** `@SpringBootTest` **for Integration Testing**
    The most common way to perform integration tests in Spring Boot is by using the `@SpringBootTest` annotation. This annotation loads the full application context, allowing you to test the application as a whole.
 
-**Steps for Integration Testing in Spring Boot:**\
+**Steps for Integration Testing in Spring Boot:**
 1. **Add Required Dependencies**
    Make sure that you have the necessary dependencies in your `pom.xml` or `build.gradle` for testing. Common dependencies for integration testing include:
 
@@ -8171,7 +8171,7 @@ http.formLogin()
     .permitAll();  // Allow everyone to access the login page
 
 ```
-**7. **
+**7. Enabling HTTPS:**
 
 Spring Boot makes it simple to configure SSL for your application by providing properties in `application.properties`.
 
@@ -8646,7 +8646,7 @@ Filters are part of the **Servlet Container** (such as Tomcat, Jetty, etc.), and
 
 A Spring Boot filter implements the `javax.servlet.Filter` interface and must override the `doFilter` method. The `doFilter` method provides access to the `ServletRequest`, `ServletResponse`, and the `FilterChain`.
 
-**Key Methods of a Filter**\
+**Key Methods of a Filter**
 1. `doFilter(ServletRequest request, ServletResponse response, FilterChain chain):`
 
 * This method is called for each request. The filter performs its task and then either forwards the request to the next filter in the chain or directly to the servlet (controller).
@@ -10064,7 +10064,7 @@ public class RabbitMQProducer {
     }
 }
 ```
-**Step 5: Implement Consumer*\*
+**Step 5: Implement Consumer**\
 Create a listener to consume messages:
 
 ```java
@@ -10686,7 +10686,7 @@ File upload and download are common functionalities in web applications. Spring 
 ```
 file.upload-dir=uploads
 ```
-3. **Create a File Upload Controller**\
+3. **Create a File Upload Controller**
 
 A REST controller to handle file upload using `MultipartFile`.
 
