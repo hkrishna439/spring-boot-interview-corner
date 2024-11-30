@@ -12048,8 +12048,8 @@ Here are the key steps to migrate a monolithic application to microservices usin
 * **Deploy Gradually:** Deploy each microservice independently. Use Kubernetes or Docker Swarm for managing deployments at scale.
 
 **13. Maintain and Monitor Microservices**
-**Monitor** the performance of individual microservices using tools like **Prometheus** and **Grafana**.
-**Scale** each microservice independently based on demand using container orchestration platforms like **Kubernetes**.
+- **Monitor** the performance of individual microservices using tools like **Prometheus** and **Grafana**.
+- **Scale** each microservice independently based on demand using container orchestration platforms like **Kubernetes**.
 
 
 
