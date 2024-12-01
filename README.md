@@ -29,7 +29,7 @@
 27. [How do you configure multiple data sources in Spring Boot?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#27-how-do-you-configure-multiple-data-sources-in-spring-boot)
 28. [What is the use of the application.properties file?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#28-what-is-the-use-of-the-applicationproperties-file)
 29. [How do you create a RESTful API in Spring Boot?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#29-how-do-you-create-a-restful-api-in-spring-boot)
-30.[ What is the role of @PostMapping?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#30-what-is-the-role-of-postmapping)
+30. [ What is the role of @PostMapping?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#30-what-is-the-role-of-postmapping)
 31. [How do you handle exceptions in REST APIs?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#31-how-do-you-handle-exceptions-in-rest-apis)
 32. [How to validate user input in Spring Boot?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#32-how-to-validate-user-input-in-spring-boot)
 33. [What is ResponseEntity in Spring Boot?](https://github.com/hkrishna439/spring-boot-interview-corner?tab=readme-ov-file#33-what-is-responseentity-in-spring-boot)
