@@ -1422,7 +1422,7 @@ Summary
 
 `@Autowired` is an annotation in the Spring Framework used for **dependency injection**. It allows Spring to automatically resolve and inject a bean into another bean, reducing boilerplate code and making it easier to manage dependencies.
 
-**Key Features of @Autowired:**
+**Key Features of `@Autowired`:**
 
 1. **Dependency Injection:**
 Automatically injects required dependencies into a class.
@@ -1436,7 +1436,7 @@ Can be applied to constructors, fields, or setter methods.
 4. **Optional Dependencies:**
 Can handle optional dependencies with `required = false`.
 
-**How @Autowired Works:**
+**How `@Autowired` Works:**
 
 1. **Default Behavior:**
    By default, `@Autowired` performs type-based injection:
@@ -12061,7 +12061,7 @@ Here are the key steps to migrate a monolithic application to microservices usin
 *    **Determine Migration Goals:** Decide on the reasons for migration (e.g., scalability, maintainability, fault tolerance, etc.) and ensure that these objectives are aligned with your microservices architecture.
 *    **Document Key Business Capabilities:** Identify the core business capabilities of the application that will become independent microservices.
 
-* **2. Choose the Microservices Architecture Style**
+**2. Choose the Microservices Architecture Style**
 * **Decentralized Data Management:** Each microservice should have its own database to ensure independence and reduce tight coupling between services.
 * **APIs and Communication:** Define how services will communicate with each other. Common approaches include:
   * **RESTful APIs** (using S**pring Web**)
@@ -12099,7 +12099,7 @@ Here are the key steps to migrate a monolithic application to microservices usin
   - The API Gateway handles routing, load balancing, security, rate limiting, etc.
   - It acts as the entry point to the microservices architecture.
 
-6. **Implement Centralized Configuration Management**
+**6. Implement Centralized Configuration Management**
 - **Spring Cloud Config:** Use **Spring Cloud Config** to manage configuration properties centrally. This allows you to modify configurations without redeploying each microservice.
 - **Externalize Configurations:** Store your microservice configurations in a Git repository or a database. Use Spring Boot’s `@Value` or `@ConfigurationProperties` annotations to inject these properties into your services.
 
